@@ -1,6 +1,6 @@
 # BD-MiniProject
 
-Grzegorz Piśkorkski: piskorski@student.agh.edu.pl
+Grzegorz Piśkorski: piskorski@student.agh.edu.pl
 
 Antoni Wójcik: antoniwojcik@student.agh.edu.pl
 
