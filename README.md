@@ -8,4 +8,4 @@ Temat projektu:
     Rezerwowanie noclegów w hotelach. Aplikacja będzie pozwalała na rezerwację pokojów w kilku wybranych hotelach.
 
 Technologia:
-    MongoDB, React
+    MongoDB, Python Flask
