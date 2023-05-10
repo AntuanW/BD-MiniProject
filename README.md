@@ -31,33 +31,33 @@ Technologia:
 
 ## Kolekcje:
 ### Hotels
-{
-    "_id": ObjectId(),
-    "name": string,
-    "street": string,
-    "city": string,
-    "zipCode": string
-}
+{  
+    "_id": ObjectId(),  
+    "name": string,  
+    "street": string,  
+    "city": string,  
+    "zipCode": string  
+}  
 
 ### Rooms
-{
-    "_id": ObjectId(),
-    "hotelId": ObjectId(),  <- foreign key z Hotels
-    "type": string,
-    "roomNumber": string,
-    "pricePerNight": number,
-    "isAvailable": boolean
-}
+{  
+    "_id": ObjectId(),  
+    "hotelId": ObjectId(),  <- foreign key z Hotels  
+    "type": string,  
+    "roomNumber": string,  
+    "pricePerNight": number,  
+    "isAvailable": boolean  
+}  
 
 ### Customers
-{
-    "_id": ObjectId(),
-    "name": string,
-    "surname": string,
-    "email": string,
-    "bookings": [{
-        "roomId": ObjectId,
-        "checkInDate": string,
-        "checkOutDate": string
-    }]
-}
+{  
+    "_id": ObjectId(),  
+    "name": string,  
+    "surname": string,  
+    "email": string,  
+    "bookings": [{  
+        "roomId": ObjectId,  
+        "checkInDate": string,  
+        "checkOutDate": string  
+    }]  
+}  
