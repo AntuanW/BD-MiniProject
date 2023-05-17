@@ -1,6 +1,6 @@
 # pip install -r requirements.txt
 flask
-pymongo~=3.6.0
+pymongo
 passlib
 dnspython
 python-dotenv
