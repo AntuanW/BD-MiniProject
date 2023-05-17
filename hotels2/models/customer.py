@@ -1,3 +1,15 @@
+def to_obj(data):
+    customer = Customer(
+        data["name"],
+        data["surname"],
+        data["email"],
+        data["_id"],
+    )
+
+    customer.bookings = data["bookings"]
+    return customer
+
+
 class Customer:
     def __init__(self, name, surname, email, _id=None):
         self._id = _id
@@ -22,14 +34,3 @@ class Customer:
             "email": self.email,
             "bookings": self.bookings
         }
-
-    def to_obj(self, data):
-        customer = Customer(
-            data["name"],
-            data["surname"],
-            data["email"],
-            data["_id"],
-        )
-
-        customer.bookings = data["bookings"]
-        return customer

@@ -1,3 +1,15 @@
+def to_obj(data):
+    hotel = Hotel(
+        data["name"],
+        data["street"],
+        data["city"],
+        data["zip_code"],
+        data["_id"]
+    )
+
+    return hotel
+
+
 class Hotel:
     def __init__(self, name, street, city, zip_code, id_=None):
         self._id = id_
@@ -14,14 +26,3 @@ class Hotel:
             "city": self.city,
             "zip_code": self.zip_code
         }
-
-    def to_obj(self, data):
-        hotel = Hotel(
-            data["name"],
-            data["street"],
-            data["city"],
-            data["zip_code"],
-            data["_id"]
-        )
-
-        return hotel
