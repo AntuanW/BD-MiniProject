@@ -1,9 +1,9 @@
 from flask import Flask
+from hotels2 import create_app
 import pymongo
 
 
-app = Flask(__name__)
-app.secret_key = b'!yny\x99{\x88,F\x85\x19y\xd67yL'
+app = create_app()
 
 
 if __name__ == '__main__':
