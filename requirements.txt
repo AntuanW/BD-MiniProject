@@ -3,3 +3,4 @@ flask
 pymongo~=3.6.0
 passlib
 dnspython
+python-dotenv
