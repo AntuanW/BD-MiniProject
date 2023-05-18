@@ -1,18 +1,5 @@
-def to_obj(data):
-    customer = Customer(
-        data["name"],
-        data["surname"],
-        data["email"],
-        data["_id"],
-    )
-
-    customer.bookings = data["bookings"]
-    return customer
-
-
 class Customer:
-    def __init__(self, name, surname, email, _id=None):
-        self._id = _id
+    def __init__(self, name, surname, email):
         self.name = name
         self.surname = surname
         self.email = email
@@ -28,7 +15,6 @@ class Customer:
 
     def to_dict(self):
         return {
-            "_id": self._id,
             "name": self.name,
             "surname": self.surname,
             "email": self.email,
