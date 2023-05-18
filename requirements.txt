@@ -4,3 +4,4 @@ pymongo
 passlib
 dnspython
 python-dotenv
+certifi
