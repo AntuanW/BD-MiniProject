@@ -14,7 +14,7 @@ password: str = os.getenv("MONGODB_PASSWORD")
 class MongoConnection:
     def __init__(self):
         self.uri = f"""mongodb+srv://{username}:{password}@hotelscluster.53jqjfk.mongodb.net/?retryWrites=true&w=majority"""
-        self.client = MongoClient(self.uri, tlsCAFile=certifi.where())
+        self.client: MongoClient = MongoClient(self.uri, tlsCAFile=certifi.where())
         self.db: Database = self.client["HotelsDB"]
         self.customers: Collection = self.db["Customers"]
         self.hotels: Collection = self.db["Hotels"]
