@@ -11,23 +11,11 @@ Technologia:
     MongoDB, Python Flask
 
 
-# Wstępny schemat bazy danych w MongoDB
-| booking |   rooms    |  hotels |   users    |
-|  :---:  |   :---:    |  :---:  |   :---:    |
-| room()  | type       | name    | name       |
-| hotel() | capacity   | desc    | surname    |
-| date    | price      | rating  | bookings[] |
-| user()  | hotel()    | address | e-mail     |
-|         | bookings() | rooms[] | password   |
-
-
-# Główna funkcje projektu:
+# Główna założenia projektu:
 - możliwość zarezerwowania noclegu w jednym z dostępnych hotelów w bazie danych (wyświetlenie dostępnych pokoi w danym okresie czasu)
 - możliwość zarządzania swoją rezerwacją (dodanie nowej, modyfikacja jednej z "posiadanych" rezerwacji, rezygnacja z rezerwacji)
 
-# Nowa propozycja bazy danych:
-
-## Nazwa: HotelsMiniProject
+# Propozycja bazy danych:
 
 ## Kolekcje:
 ### Hotels
@@ -60,10 +48,35 @@ Technologia:
     "name": string,  
     "surname": string,  
     "email": string,  
-    "bookings": [{  
+    "bookings": [ {  
         "roomId": ObjectId,  
         "checkInDate": string,  
         "checkOutDate": string  
-    }]  
+    } ],
+    "password": string
 }
 ```
+
+# Metody i funcje operujące na poszczególnych kolekcjach:
+
+- Hotels
+  - addHotel(): dodanie hotelu do oferty
+  - removeHotel(): usunięcie hotelu wraz z pokojami
+  - listHotels(): zwrca listę dostępnych hoteli
+- Rooms
+  - addRoom(): dodawanie pokoju
+  - removeRoom(): usuwanie pokoju
+  - listRooms(): zwraca listę dostepnych pokoi
+  - setPricePerNight(): zmień cenę danego pokoju
+  - setAvailable() : zmienia dostępność pokoju
+- Customers
+  - addCustomer(): dodaje użytkownika do kolekcji
+  - removeCustomer(): usuwa użytkownika
+  - setPassword(): zmień hasło
+  - addBooking(): dodaj rezerwację
+  - listBookings(): zwraca listę rezerwacji
+  - changeRoom(): zmień pokój w rezeracji
+  - changeDate(): zmień datę pobytu
+
+# Pozostałe metody i funkcje:
+- filterRooms(): pokaż dostępne pokoje w danym przedziale czasu
