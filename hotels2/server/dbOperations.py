@@ -27,10 +27,10 @@ def remove_hotel(hotel_id: str):
 
 def get_all_hotels():
     hotels = mongo.hotels.find()
-    if hotels is None:
+    hotels = list(hotels)
+    if len(hotels):
         print("Currently there is no hotels in the database.")
-        return []
-    return list(hotels)
+    return hotels
 
 
 # ### Rooms methods ###
@@ -47,15 +47,15 @@ def remove_room(room_id: str):
 
 def get_all_rooms():
     rooms = mongo.rooms.find({"is_available": True})
-    if rooms is None:
+    rooms = list(rooms)
+    if len(rooms) == 0:
         print("No available rooms.")
-        return []
-    return list(rooms)
+    return rooms
 
 
 def get_all_rooms_of_specific_hotel(hotel_id: str):
     _id = ObjectId(hotel_id)
-    rooms = mongo.rooms.find_one({"_id": _id, "is_available": True})
+    rooms = mongo.rooms.find({"hotel_id": _id, "is_available": True})
     if rooms is None:
         print("There is no hotel with such id in the database.")
         return []
@@ -82,6 +82,5 @@ def set_availability(room_id: str, availability: bool):
 
     if update.matched_count <= 0:
         print("Failed to set availability. There is no room with such id in the database.")
-
 
 # ### Customers methods ###
