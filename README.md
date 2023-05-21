@@ -60,15 +60,16 @@ Technologia:
 # Metody i funcje operujące na poszczególnych kolekcjach:
 
 - Hotels
-  - addHotel(): dodanie hotelu do oferty
-  - removeHotel(): usunięcie hotelu wraz z pokojami
-  - listHotels(): zwrca listę dostępnych hoteli
+  - add_hotel(name, street, city, zip_code): dodanie hotelu do oferty
+  - remove_hotel(hotel_id): usunięcie hotelu wraz z pokojami
+  - get_all_hotels(): zwrca listę dostępnych hoteli
 - Rooms
-  - addRoom(): dodawanie pokoju
-  - removeRoom(): usuwanie pokoju
-  - listRooms(): zwraca listę dostepnych pokoi
-  - setPricePerNight(): zmień cenę danego pokoju
-  - setAvailable() : zmienia dostępność pokoju
+  - add_room(): dodawanie pokoju
+  - remove_room(): usuwanie pokoju
+  - get_all_rooms(): zwraca listę dostepnych pokoi
+  - get_all_rooms_of_specific_hotel(): zwraca listę dostępnych pokoi należących do konkretnego hotelu
+  - set_price_per_night(): zmień cenę danego pokoju
+  - set_availability() : zmienia dostępność pokoju
 - Customers
   - addCustomer(): dodaje użytkownika do kolekcji
   - removeCustomer(): usuwa użytkownika
