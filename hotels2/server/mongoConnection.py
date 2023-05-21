@@ -5,7 +5,7 @@ from pymongo.database import *
 from dotenv import load_dotenv
 import pprint
 
-load_dotenv('.env')
+load_dotenv()
 
 username: str = os.getenv("MONGODB_USERNAME")
 password: str = os.getenv("MONGODB_PASSWORD")
@@ -19,6 +19,3 @@ class MongoConnection:
         self.customers: Collection = self.db["Customers"]
         self.hotels: Collection = self.db["Hotels"]
         self.rooms: Collection = self.db["Rooms"]
-
-
-mongo = MongoConnection()

@@ -1,9 +1,11 @@
-from mongoConnection import mongo
+from hotels2.server.mongoConnection import *
 from hotels2.models.hotel import Hotel
 from hotels2.models.room import Room
 from hotels2.models.customer import Customer
 from bson.objectid import ObjectId
 import re
+
+mongo = MongoConnection()
 
 
 # ### Hotels methods ###
