@@ -21,5 +21,4 @@ class MongoConnection:
         self.rooms: Collection = self.db["Rooms"]
 
 
-if __name__ == '__main__':
-    mongo = MongoConnection()
+mongo = MongoConnection()
