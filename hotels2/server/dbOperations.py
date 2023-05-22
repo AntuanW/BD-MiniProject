@@ -2,6 +2,7 @@ from hotels2.server.mongoConnection import *
 from hotels2.models.hotel import Hotel
 from hotels2.models.room import Room
 from hotels2.models.customer import Customer
+from datetime import date
 from bson.objectid import ObjectId
 import re
 
@@ -177,6 +178,23 @@ def set_availability(room_id: str, availability: bool):
 
     if update.matched_count <= 0:
         print("Failed to set availability. There is no room with such id in the database.")
+
+
+def get_specific_rooms(in_date: date, out_date: date, room_type: int):
+    # specific_rooms = mongo.rooms.find({
+    #     "room_type": room_type,
+    #     "is_available": True,
+    #     "$and": [
+    #         {
+    #             "check_in_date": {"$gte": in_date}
+    #         },
+    #         {
+    #             "check_out_date": {"$lte": out_date}
+    #         }
+    #     ]
+    # })
+    # return list(specific_rooms)
+    pass
 
 
 # ### Customers methods ###
