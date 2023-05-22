@@ -97,6 +97,12 @@ customer_validator = {
 }
 
 
+def add_validators():
+    mongo.db.command("collMod", "Rooms", validator=room_validator)
+    mongo.db.command("collMod", "Hotels", validator=hotel_validator)
+    mongo.db.command("collMod", "Customers", validator=customer_validator)
+
+
 # ### Hotels methods ###
 def add_hotel(name: str, street: str, city: str, zip_code: str):
     zip_regex = r"^\d{5}$"
@@ -172,4 +178,31 @@ def set_availability(room_id: str, availability: bool):
     if update.matched_count <= 0:
         print("Failed to set availability. There is no room with such id in the database.")
 
+
 # ### Customers methods ###
+def add_customer():
+    pass
+
+
+def remove_customer():
+    pass
+
+
+def set_password():
+    pass
+
+
+def add_new_booking():
+    pass
+
+
+def list_all_bookings():
+    pass
+
+
+def change_room():
+    pass
+
+
+def change_booking_date():
+    pass
