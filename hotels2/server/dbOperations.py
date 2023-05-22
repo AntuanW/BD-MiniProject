@@ -55,8 +55,9 @@ room_validator = {
             },
             "bookings": {
                 "bsonType": "array",
+                "minItems": 0,
                 "items": {
-                    "bsonType": "object",
+                    "bsonType": ["object", "null"],
                     "required": ["booking_id", "date_from", "date_to"],
                     "properties": {
                         "booking_id": {
@@ -118,8 +119,8 @@ customer_validator = {
 
 def add_validators():
     mongo.db.command("collMod", "Rooms", validator=room_validator)
-    mongo.db.command("collMod", "Hotels", validator=hotel_validator)
-    mongo.db.command("collMod", "Customers", validator=customer_validator)
+    # mongo.db.command("collMod", "Hotels", validator=hotel_validator)
+    # mongo.db.command("collMod", "Customers", validator=customer_validator)
 
 
 # ### Hotels methods ###
