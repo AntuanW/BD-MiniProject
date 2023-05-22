@@ -37,7 +37,14 @@ Technologia:
     "type": string,  
     "roomNumber": string,  
     "pricePerNight": number,  
-    "isAvailable": boolean  
+    "isAvailable": boolean,
+    "reservationDates": [
+      {
+        "booking_id": ObjectId(),
+        "date_from": date,
+        "date_to": date
+      }
+    ]
 }
 ```
 

@@ -52,6 +52,18 @@ room_validator = {
             },
             "is_available": {
                 "bsonType": "bool"
+            },
+            "bookings": {
+                "bsonType": "array",
+                "items": {
+                    "bsonType": "object",
+                    "required": ["booking_id", "date_from", "date_to"],
+                    "properties": {
+                        "booking_id": "objectId",
+                        "date_from": "date",
+                        "date_to": "date"
+                    }
+                }
             }
         }
     }
