@@ -19,6 +19,6 @@ class Customer:
             "name": self.name,
             "surname": self.surname,
             "email": self.email,
-            "bookings": self.bookings,
-            "password": self.password
+            "password": self.password,
+            "bookings": self.bookings
         }
