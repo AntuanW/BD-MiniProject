@@ -8,7 +8,7 @@ import pprint
 
 if __name__ == '__main__':
     #app.run(debug=True)
-    # add_validators()
-    add_room("646ba9cec1305c12cedb02bb", 4, 1, 150, True)
+    add_validators()
+    # add_room("646ba9cec1305c12cedb02bb", 2, 3, 100.0, True)
 
     pass

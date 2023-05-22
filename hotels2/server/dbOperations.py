@@ -33,6 +33,48 @@ hotel_validator = {
 }
 
 
+# room_validator = {
+#     "$jsonSchema": {
+#         "bsonType": "object",
+#         "required": ["hotel_id", "room_type", "room_number", "price_per_night", "is_available"],
+#         "properties": {
+#             "hotel_id": {
+#                 "bsonType": "objectId"
+#             },
+#             "room_type": {
+#                 "bsonType": "int"
+#             },
+#             "room_number": {
+#                 "bsonType": "int"
+#             },
+#             "price_per_night": {
+#                 "bsonType": "double"
+#             },
+#             "is_available": {
+#                 "bsonType": "bool"
+#             },
+#             "bookings": {
+#                 "bsonType": "array",
+#                 "minItems": 0,
+#                 "items": {
+#                     "bsonType": ["object", "null"],
+#                     "required": ["booking_id", "date_from", "date_to"],
+#                     "properties": {
+#                         "booking_id": {
+#                             "bsonType": "objectId"
+#                         },
+#                         "date_from": {
+#                             "bsonType": "date"
+#                         },
+#                         "date_to": {
+#                             "bsonType": "date"
+#                         }
+#                     }
+#                 }
+#             }
+#         }
+#     }
+# }
 room_validator = {
     "$jsonSchema": {
         "bsonType": "object",
@@ -55,9 +97,8 @@ room_validator = {
             },
             "bookings": {
                 "bsonType": "array",
-                "minItems": 0,
                 "items": {
-                    "bsonType": ["object", "null"],
+                    "bsonType": "object",
                     "required": ["booking_id", "date_from", "date_to"],
                     "properties": {
                         "booking_id": {
@@ -72,11 +113,56 @@ room_validator = {
                     }
                 }
             }
-        }
+        },
+        "allOf": [
+            {
+                "anyOf": [
+                    {"not": {"properties": {"bookings": {"items": {"type": "object"}}}}},
+                    {"properties": {"bookings": {"items": {"not": {"required": ["booking_id", "date_from", "date_to"]}}}}}
+                ]
+            }
+        ]
     }
 }
 
-
+# customer_validator = {
+#     "$jsonSchema": {
+#         "bsonType": "object",
+#         "required": ["name", "surname", "email", "password", "bookings"],
+#         "properties": {
+#             "name": {
+#                 "bsonType": "string"
+#             },
+#             "surname": {
+#                 "bsonType": "string"
+#             },
+#             "email": {
+#                 "bsonType": "string"
+#             },
+#             "password": {
+#                 "bsonType": "string"
+#             },
+#             "bookings": {
+#                 "bsonType": "array",
+#                 "items": {
+#                     "bsonType": "object",
+#                     "required": ["room_id", "check_in_date", "check_out_date"],
+#                     "properties": {
+#                         "room_id": {
+#                             "bsonType": "objectId"
+#                         },
+#                         "check_in_date": {
+#                             "bsonType": "date"
+#                         },
+#                         "check_out_date": {
+#                             "bsonType": "date"
+#                         }
+#                     }
+#                 }
+#             }
+#         }
+#     }
+# }
 customer_validator = {
     "$jsonSchema": {
         "bsonType": "object",
@@ -95,7 +181,7 @@ customer_validator = {
                 "bsonType": "string"
             },
             "bookings": {
-                "bsonType": "array",
+                "bsonType": ["array"],
                 "items": {
                     "bsonType": "object",
                     "required": ["room_id", "check_in_date", "check_out_date"],
@@ -112,15 +198,23 @@ customer_validator = {
                     }
                 }
             }
-        }
+        },
+        "allOf": [
+            {
+                "anyOf": [
+                    {"not": {"properties": {"bookings": {"items": {"type": "object"}}}}},
+                    {"properties": {"bookings": {"items": {"not": {"required": ["room_id", "check_in_date", "check_out_date"]}}}}}
+                ]
+            }
+        ]
     }
 }
 
 
 def add_validators():
     mongo.db.command("collMod", "Rooms", validator=room_validator)
-    # mongo.db.command("collMod", "Hotels", validator=hotel_validator)
-    # mongo.db.command("collMod", "Customers", validator=customer_validator)
+    mongo.db.command("collMod", "Hotels", validator=hotel_validator)
+    mongo.db.command("collMod", "Customers", validator=customer_validator)
 
 
 # ### Hotels methods ###

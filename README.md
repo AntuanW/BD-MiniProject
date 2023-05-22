@@ -21,24 +21,22 @@ Technologia:
 ### Hotels
 ```
 {  
-    "_id": ObjectId(),  
     "name": string,  
     "street": string,  
     "city": string,  
-    "zipCode": string  
+    "zip_code": string  
 }
 ```
 
 ### Rooms
 ```
-{  
-    "_id": ObjectId(),  
-    "hotelId": ObjectId(),  <- foreign key z Hotels  
-    "type": string,  
-    "roomNumber": string,  
-    "pricePerNight": number,  
-    "isAvailable": boolean,
-    "reservationDates": [
+{   
+    "hotel_id": ObjectId(),  
+    "room_type": string,  
+    "room_number": string,  
+    "price_per_night": number,  
+    "is_available": boolean,
+    "bookings": [
       {
         "booking_id": ObjectId(),
         "date_from": date,
@@ -50,15 +48,14 @@ Technologia:
 
 ### Customers
 ```
-{  
-    "_id": ObjectId(),  
+{   
     "name": string,  
     "surname": string,  
     "email": string,  
     "bookings": [ {  
         "roomId": ObjectId,  
-        "checkInDate": string,  
-        "checkOutDate": string  
+        "check_in_date": string,  
+        "check_out_date": string  
     } ],
     "password": string
 }
@@ -77,6 +74,7 @@ Technologia:
   - get_all_rooms_of_specific_hotel(): zwraca listę dostępnych pokoi należących do konkretnego hotelu
   - set_price_per_night(): zmień cenę danego pokoju
   - set_availability() : zmienia dostępność pokoju
+  - filter_rooms(): pokaż dostępne pokoje ze wskazanymi filtrami
 - Customers
   - addCustomer(): dodaje użytkownika do kolekcji
   - removeCustomer(): usuwa użytkownika
@@ -86,5 +84,207 @@ Technologia:
   - changeRoom(): zmień pokój w rezeracji
   - changeDate(): zmień datę pobytu
 
-# Pozostałe metody i funkcje:
-- filterRooms(): pokaż dostępne pokoje w danym przedziale czasu
+# Schema validators dla naszego schematu
+
+## Hotels
+```
+{
+  $jsonSchema: {
+    bsonType: 'object',
+    required: [
+      'name',
+      'street',
+      'city',
+      'zip_code'
+    ],
+    properties: {
+      name: {
+        bsonType: 'string'
+      },
+      street: {
+        bsonType: 'string'
+      },
+      city: {
+        bsonType: 'string'
+      },
+      zip_code: {
+        bsonType: 'string',
+        description: 'string consisting of 5 digit without any separators'
+      }
+    }
+  }
+}
+```
+
+## Rooms
+```
+{
+  $jsonSchema: {
+    bsonType: 'object',
+    required: [
+      'hotel_id',
+      'room_type',
+      'room_number',
+      'price_per_night',
+      'is_available'
+    ],
+    properties: {
+      hotel_id: {
+        bsonType: 'objectId'
+      },
+      room_type: {
+        bsonType: 'int'
+      },
+      room_number: {
+        bsonType: 'int'
+      },
+      price_per_night: {
+        bsonType: 'double'
+      },
+      is_available: {
+        bsonType: 'bool'
+      },
+      bookings: {
+        bsonType: 'array',
+        items: {
+          bsonType: 'object',
+          required: [
+            'booking_id',
+            'date_from',
+            'date_to'
+          ],
+          properties: {
+            booking_id: {
+              bsonType: 'objectId'
+            },
+            date_from: {
+              bsonType: 'date'
+            },
+            date_to: {
+              bsonType: 'date'
+            }
+          }
+        }
+      }
+    },
+    allOf: [
+      {
+        anyOf: [
+          {
+            not: {
+              properties: {
+                bookings: {
+                  items: {
+                    type: 'object'
+                  }
+                }
+              }
+            }
+          },
+          {
+            properties: {
+              bookings: {
+                items: {
+                  not: {
+                    required: [
+                      'booking_id',
+                      'date_from',
+                      'date_to'
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+## Customers
+```
+{
+  $jsonSchema: {
+    bsonType: 'object',
+    required: [
+      'name',
+      'surname',
+      'email',
+      'password',
+      'bookings'
+    ],
+    properties: {
+      name: {
+        bsonType: 'string'
+      },
+      surname: {
+        bsonType: 'string'
+      },
+      email: {
+        bsonType: 'string'
+      },
+      password: {
+        bsonType: 'string'
+      },
+      bookings: {
+        bsonType: [
+          'array'
+        ],
+        items: {
+          bsonType: 'object',
+          required: [
+            'room_id',
+            'check_in_date',
+            'check_out_date'
+          ],
+          properties: {
+            room_id: {
+              bsonType: 'objectId'
+            },
+            check_in_date: {
+              bsonType: 'date'
+            },
+            check_out_date: {
+              bsonType: 'date'
+            }
+          }
+        }
+      }
+    },
+    allOf: [
+      {
+        anyOf: [
+          {
+            not: {
+              properties: {
+                bookings: {
+                  items: {
+                    type: 'object'
+                  }
+                }
+              }
+            }
+          },
+          {
+            properties: {
+              bookings: {
+                items: {
+                  not: {
+                    required: [
+                      'room_id',
+                      'check_in_date',
+                      'check_out_date'
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
+```

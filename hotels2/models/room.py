@@ -14,5 +14,5 @@ class Room:
             "room_number": self.room_number,
             "price_per_night": self.price_per_night,    # filter ><=
             "is_available": self.is_available,
-            "booking_dates": self.bookings
+            "bookings": self.bookings
         }
