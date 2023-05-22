@@ -59,9 +59,15 @@ room_validator = {
                     "bsonType": "object",
                     "required": ["booking_id", "date_from", "date_to"],
                     "properties": {
-                        "booking_id": "objectId",
-                        "date_from": "date",
-                        "date_to": "date"
+                        "booking_id": {
+                            "bsonType": "objectId"
+                        },
+                        "date_from": {
+                            "bsonType": "date"
+                        },
+                        "date_to": {
+                            "bsonType": "date"
+                        }
                     }
                 }
             }

@@ -1,10 +1,10 @@
 from flask import Flask
 from hotels2 import create_app
 import pymongo
-from server.dbOperations import *
+from hotels2.server.dbOperations import *
 import pprint
 
-app = create_app()
+# app = create_app()
 
 if __name__ == '__main__':
     # app.run(debug=True)
@@ -17,5 +17,4 @@ if __name__ == '__main__':
     # pprint.pprint(get_all_rooms_of_specific_hotel("646a2a34f9a06bd06034a12e"))
     # set_price_per_night("646a2f93907ce15c59aa479f", 150)
     # set_availability("646a2f93907ce15c59aa479f", False)
-
     pass
