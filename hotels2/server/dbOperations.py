@@ -1,214 +1,15 @@
+import pprint
+
 from hotels2.server.mongoConnection import *
 from hotels2.models.hotel import Hotel
 from hotels2.models.room import Room
 from hotels2.models.customer import Customer
 from datetime import date
 from bson.objectid import ObjectId
+from hotels2.models.validators import *
 import re
 
 mongo = MongoConnection()
-
-
-# ### Mongo schemas ###
-hotel_validator = {
-    "$jsonSchema": {
-        "bsonType": "object",
-        "required": ["name", "street", "city", "zip_code"],
-        "properties": {
-            "name": {
-                "bsonType": "string"
-            },
-            "street": {
-                "bsonType": "string"
-            },
-            "city": {
-                "bsonType": "string"
-            },
-            "zip_code": {
-                "bsonType": "string",
-                "description": "string consisting of 5 digit without any separators"
-            }
-        }
-    }
-}
-
-
-# room_validator = {
-#     "$jsonSchema": {
-#         "bsonType": "object",
-#         "required": ["hotel_id", "room_type", "room_number", "price_per_night", "is_available"],
-#         "properties": {
-#             "hotel_id": {
-#                 "bsonType": "objectId"
-#             },
-#             "room_type": {
-#                 "bsonType": "int"
-#             },
-#             "room_number": {
-#                 "bsonType": "int"
-#             },
-#             "price_per_night": {
-#                 "bsonType": "double"
-#             },
-#             "is_available": {
-#                 "bsonType": "bool"
-#             },
-#             "bookings": {
-#                 "bsonType": "array",
-#                 "minItems": 0,
-#                 "items": {
-#                     "bsonType": ["object", "null"],
-#                     "required": ["booking_id", "date_from", "date_to"],
-#                     "properties": {
-#                         "booking_id": {
-#                             "bsonType": "objectId"
-#                         },
-#                         "date_from": {
-#                             "bsonType": "date"
-#                         },
-#                         "date_to": {
-#                             "bsonType": "date"
-#                         }
-#                     }
-#                 }
-#             }
-#         }
-#     }
-# }
-room_validator = {
-    "$jsonSchema": {
-        "bsonType": "object",
-        "required": ["hotel_id", "room_type", "room_number", "price_per_night", "is_available"],
-        "properties": {
-            "hotel_id": {
-                "bsonType": "objectId"
-            },
-            "room_type": {
-                "bsonType": "int"
-            },
-            "room_number": {
-                "bsonType": "int"
-            },
-            "price_per_night": {
-                "bsonType": "double"
-            },
-            "is_available": {
-                "bsonType": "bool"
-            },
-            "bookings": {
-                "bsonType": "array",
-                "items": {
-                    "bsonType": "object",
-                    "required": ["booking_id", "date_from", "date_to"],
-                    "properties": {
-                        "booking_id": {
-                            "bsonType": "objectId"
-                        },
-                        "date_from": {
-                            "bsonType": "date"
-                        },
-                        "date_to": {
-                            "bsonType": "date"
-                        }
-                    }
-                }
-            }
-        },
-        "allOf": [
-            {
-                "anyOf": [
-                    {"not": {"properties": {"bookings": {"items": {"type": "object"}}}}},
-                    {"properties": {"bookings": {"items": {"not": {"required": ["booking_id", "date_from", "date_to"]}}}}}
-                ]
-            }
-        ]
-    }
-}
-
-# customer_validator = {
-#     "$jsonSchema": {
-#         "bsonType": "object",
-#         "required": ["name", "surname", "email", "password", "bookings"],
-#         "properties": {
-#             "name": {
-#                 "bsonType": "string"
-#             },
-#             "surname": {
-#                 "bsonType": "string"
-#             },
-#             "email": {
-#                 "bsonType": "string"
-#             },
-#             "password": {
-#                 "bsonType": "string"
-#             },
-#             "bookings": {
-#                 "bsonType": "array",
-#                 "items": {
-#                     "bsonType": "object",
-#                     "required": ["room_id", "check_in_date", "check_out_date"],
-#                     "properties": {
-#                         "room_id": {
-#                             "bsonType": "objectId"
-#                         },
-#                         "check_in_date": {
-#                             "bsonType": "date"
-#                         },
-#                         "check_out_date": {
-#                             "bsonType": "date"
-#                         }
-#                     }
-#                 }
-#             }
-#         }
-#     }
-# }
-customer_validator = {
-    "$jsonSchema": {
-        "bsonType": "object",
-        "required": ["name", "surname", "email", "password", "bookings"],
-        "properties": {
-            "name": {
-                "bsonType": "string"
-            },
-            "surname": {
-                "bsonType": "string"
-            },
-            "email": {
-                "bsonType": "string"
-            },
-            "password": {
-                "bsonType": "string"
-            },
-            "bookings": {
-                "bsonType": ["array"],
-                "items": {
-                    "bsonType": "object",
-                    "required": ["room_id", "check_in_date", "check_out_date"],
-                    "properties": {
-                        "room_id": {
-                            "bsonType": "objectId"
-                        },
-                        "check_in_date": {
-                            "bsonType": "date"
-                        },
-                        "check_out_date": {
-                            "bsonType": "date"
-                        }
-                    }
-                }
-            }
-        },
-        "allOf": [
-            {
-                "anyOf": [
-                    {"not": {"properties": {"bookings": {"items": {"type": "object"}}}}},
-                    {"properties": {"bookings": {"items": {"not": {"required": ["room_id", "check_in_date", "check_out_date"]}}}}}
-                ]
-            }
-        ]
-    }
-}
 
 
 def add_validators():
@@ -233,7 +34,8 @@ def add_hotel(name: str, street: str, city: str, zip_code: str):
 
 def remove_hotel(hotel_id: str):
     _id = ObjectId(hotel_id)
-    mongo.hotels.delete_one({"_id": _id})
+    res = mongo.hotels.delete_one({"_id": _id})
+    print("[SERVER] Removed:", res.deleted_count, "elements")
     # TODO: remove all rooms of given hotel
 
 
@@ -246,15 +48,17 @@ def get_all_hotels():
 
 
 # ### Rooms methods ###
-def add_room(hotel_id: str, room_type: int, room_number: int, ppn: float, availability: bool):
+def add_room(hotel_id: str, room_type: int, room_number: int, ppn, availability: bool = True):
     _id = ObjectId(hotel_id)
-    new_room = Room(_id, room_type, room_number, ppn, availability)
+    new_room = Room(_id, room_type, room_number, float(ppn), availability)
     mongo.rooms.insert_one(new_room.to_dict())
+    # todo check if room exist
 
 
 def remove_room(room_id: str):
     _id = ObjectId(room_id)
-    mongo.rooms.delete_one({"_id": _id})
+    res = mongo.rooms.delete_one({"_id": _id})
+    print("[SERVER] Removed:", res.deleted_count, "elements")
 
 
 def get_all_rooms():
@@ -276,17 +80,21 @@ def get_all_rooms_of_specific_hotel(hotel_id: str):
     return list(rooms)
 
 
-def set_price_per_night(room_id: str, new_price: float):
+def set_price_per_night(room_id: str, new_price):
     _id = ObjectId(room_id)
     price_update = {
-        "$set": {"price_per_night": new_price}
+        "$set": {"price_per_night": float(new_price)}
     }
-    update = mongo.rooms.update_one({"_id": _id}, price_update)
-
-    if update.matched_count <= 0:
-        print("Failed to set nie price per night. There is no room with such id in the database.")
-        return False
-    return True
+    try:
+        update = mongo.rooms.update_one({"_id": _id}, price_update)
+        if update.matched_count <= 0:
+            print("[SERVER] No room with such id")
+            return False
+        return True
+    except Exception as e:
+        print("[SERVER] Validation failed")
+        pprint.pprint(e)
+    return False
 
 
 def set_availability(room_id: str, availability: bool):
@@ -297,7 +105,7 @@ def set_availability(room_id: str, availability: bool):
     update = mongo.rooms.update_one({"_id": _id}, availability_update)
 
     if update.matched_count <= 0:
-        print("Failed to set availability. There is no room with such id in the database.")
+        print("[SERVER] No room with such id")
         return False
     return True
 
@@ -320,13 +128,15 @@ def add_customer(name: str, surname: str, mail: str, passwd: str):
         mongo.customers.insert_one(new_customer.to_dict())
         return True
     else:
-        print("Invalid email format, try - (string1)@(string2).(2+characters)")
+        print("[SERVER] Invalid email format, try - (string1)@(string2).(2+characters)")
         return False
+    # todo check if email isn t occupied
 
 
 def remove_customer(customer_id):
     _id = ObjectId(customer_id)
-    mongo.customers.delete_one({"_id": _id})
+    res = mongo.customers.delete_one({"_id": _id})
+    print("[SERVER] Removed:", res.deleted_count, "elements")
 
 
 def set_password(customer_id, new_password):
@@ -335,7 +145,7 @@ def set_password(customer_id, new_password):
     password_update = {
         "$set": {"password": new_password}
     }
-    update = mongo.rooms.update_one({"_id": _id}, password_update)
+    update = mongo.customers.update_one({"_id": _id}, password_update)
 
     if update.matched_count <= 0:
         print("Failed to set new password. There is no customer with such id in the database.")
@@ -395,3 +205,5 @@ def change_booking_date():
     # 2. if true -> change dates in both bookings
     # 3. else -> return a proper information
     pass
+
+# todo tryfunc
