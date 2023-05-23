@@ -214,37 +214,20 @@ def add_new_booking(customer_id: str, room_id: str, check_in: datetime, check_ou
         print("Check in date must be less than check out date.")
         return False
 
-    # TODO: check if room is available on 100%
-    # rooms_ = mongo.rooms.find({"_id": room_id}, {"is_available": True}, {
-    #     "$or": [
-    #         {
-    #             "bookings": {"check_in_date": {"$gte": check_out}}
-    #         },
-    #         {
-    #             "bookings": {"check_out_date": {"$lte": check_in}}
-    #         }
-    #     ]
-    # })
-    # rooms_ = mongo.rooms.find({
-    #     "_id": room_id,
-    #     "is_available": True,
-    #     "$or": [
-    #         {
-    #             "bookings.check_in_date": {"$gte": check_out}
-    #         },
-    #         {
-    #             "bookings.check_out_date": {"$lte": check_in}
-    #         }
-    #     ]
-    # })
+    # TODO: przetestowac
+    # jak jest pusty to termin nachodzi
     rooms_ = mongo.rooms.find({
         "_id": room_id,
         "is_available": True,
         "bookings": {
             "$elemMatch": {
                 "$or": [
-                    {"check_in_date": {"$gte": check_out}},
-                    {"check_out_date": {"$lte": check_in}}
+                    {
+                        "date_from": {"$gte": check_out}
+                    },
+                    {
+                        "date_to": {"$lte": check_in}
+                    }
                 ]
             }
         }
@@ -273,10 +256,11 @@ def add_new_booking(customer_id: str, room_id: str, check_in: datetime, check_ou
         if customer_update.matched_count <= 0:
             print("Failed to add booking to a customer.")
             return False
-
+        print("[SERVER] Term is OK.")
         return True
-    print("[SERVER] Term is colliding.")
-    return False
+    else:
+        print("[SERVER] Term is colliding.")
+        return False
 
 
 def list_all_bookings(customer_id: str):
