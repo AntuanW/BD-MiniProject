@@ -4,7 +4,7 @@ from hotels2.server.mongoConnection import *
 from hotels2.models.hotel import Hotel
 from hotels2.models.room import Room
 from hotels2.models.customer import Customer
-from datetime import date
+from datetime import datetime
 from bson.objectid import ObjectId
 from hotels2.models.validators import *
 import re
@@ -34,9 +34,10 @@ def add_hotel(name: str, street: str, city: str, zip_code: str):
 
 def remove_hotel(hotel_id: str):
     _id = ObjectId(hotel_id)
-    res = mongo.hotels.delete_one({"_id": _id})
-    print("[SERVER] Removed:", res.deleted_count, "elements")
-    # TODO: remove all rooms of given hotel
+    res1 = mongo.hotels.delete_one({"_id": _id})
+    res2 = mongo.rooms.delete_many({"hotel_id": _id})
+    print("[SERVER] Removed:", res1.deleted_count, "hotels")
+    print("[SERVER] Removed:", res2.deleted_count, "rooms")
 
 
 def get_all_hotels():
@@ -50,9 +51,13 @@ def get_all_hotels():
 # ### Rooms methods ###
 def add_room(hotel_id: str, room_type: int, room_number: int, ppn, availability: bool = True):
     _id = ObjectId(hotel_id)
-    new_room = Room(_id, room_type, room_number, float(ppn), availability)
-    mongo.rooms.insert_one(new_room.to_dict())
-    # todo check if room exist
+    count = mongo.rooms.count_documents({"room_number": room_number})
+
+    if count > 0:
+        print("[SERVER] Room number", room_number, " already exists.")
+    else:
+        new_room = Room(_id, room_type, room_number, float(ppn), availability)
+        mongo.rooms.insert_one(new_room.to_dict())
 
 
 def remove_room(room_id: str):
@@ -110,7 +115,7 @@ def set_availability(room_id: str, availability: bool):
     return True
 
 
-def get_specific_rooms(in_date: date, out_date: date, room_type: int):
+def get_specific_rooms(in_date: datetime, out_date: datetime, room_type: int):
     pass
 
 
@@ -124,13 +129,16 @@ def add_customer(name: str, surname: str, mail: str, passwd: str):
     result = re.match(email_pattern, mail)
 
     if result:
+        count = mongo.customers.count_documents({"email": mail})
+        if count > 0:
+            print("[SERVER] This email address is already taken.")
+            return False
         new_customer = Customer(name, surname, mail, passwd)
         mongo.customers.insert_one(new_customer.to_dict())
         return True
     else:
         print("[SERVER] Invalid email format, try - (string1)@(string2).(2+characters)")
         return False
-    # todo check if email isn t occupied
 
 
 def remove_customer(customer_id):
@@ -140,21 +148,26 @@ def remove_customer(customer_id):
 
 
 def set_password(customer_id, new_password):
-    # TODO: check if new and old password are the same
     _id = ObjectId(customer_id)
+    old_password = mongo.customers.find_one({"_id": _id})
+
+    if old_password.get("password") == new_password:
+        print("[SERVER] New password cannot be the same as the old one.")
+        return False
+
     password_update = {
         "$set": {"password": new_password}
     }
     update = mongo.customers.update_one({"_id": _id}, password_update)
 
     if update.matched_count <= 0:
-        print("Failed to set new password. There is no customer with such id in the database.")
+        print("[SERVER] Failed to set new password. There is no customer with such id in the database.")
         return False
 
     return True
 
 
-def add_new_booking(customer_id: str, room_id: str, check_in: date, check_out: date):
+def add_new_booking(customer_id: str, room_id: str, check_in: datetime, check_out: datetime):
     customer_id = ObjectId(customer_id)
     room_id = ObjectId(room_id)
 
@@ -163,30 +176,68 @@ def add_new_booking(customer_id: str, room_id: str, check_in: date, check_out: d
         return False
 
     # TODO: check if room is available on 100%
+    # rooms_ = mongo.rooms.find({"_id": room_id}, {"is_available": True}, {
+    #     "$or": [
+    #         {
+    #             "bookings": {"check_in_date": {"$gte": check_out}}
+    #         },
+    #         {
+    #             "bookings": {"check_out_date": {"$lte": check_in}}
+    #         }
+    #     ]
+    # })
+    # rooms_ = mongo.rooms.find({
+    #     "_id": room_id,
+    #     "is_available": True,
+    #     "$or": [
+    #         {
+    #             "bookings.check_in_date": {"$gte": check_out}
+    #         },
+    #         {
+    #             "bookings.check_out_date": {"$lte": check_in}
+    #         }
+    #     ]
+    # })
+    rooms_ = mongo.rooms.find({
+        "_id": room_id,
+        "is_available": True,
+        "bookings": {
+            "$elemMatch": {
+                "$or": [
+                    {"check_in_date": {"$gte": check_out}},
+                    {"check_out_date": {"$lte": check_in}}
+                ]
+            }
+        }
+    })
+    pprint.pprint(list(rooms_))
 
-    customer_booking = {
-        "room_id": room_id,
-        "check_in_date": check_in,
-        "check_out_date": check_out
-    }
+    if not rooms_:
+        customer_booking = {
+            "room_id": room_id,
+            "check_in_date": check_in,
+            "check_out_date": check_out
+        }
 
-    room_booking = {
-        "booking_id": customer_id,
-        "date_from": check_in,
-        "date_to": check_out
-    }
+        room_booking = {
+            "booking_id": customer_id,
+            "date_from": check_in,
+            "date_to": check_out
+        }
 
-    room_update = mongo.rooms.update_one({"_id": room_id}, {"$push": {"bookings": room_booking}})
-    if room_update.matched_count <= 0:
-        print("Failed to add booking to a room.")
-        return False
+        room_update = mongo.rooms.update_one({"_id": room_id}, {"$push": {"bookings": room_booking}})
+        if room_update.matched_count <= 0:
+            print("Failed to add booking to a room.")
+            return False
 
-    customer_update = mongo.customers.update_one({"_id": customer_id}, {"$push": {"bookings": customer_booking}})
-    if customer_update.matched_count <= 0:
-        print("Failed to add booking to a customer.")
-        return False
+        customer_update = mongo.customers.update_one({"_id": customer_id}, {"$push": {"bookings": customer_booking}})
+        if customer_update.matched_count <= 0:
+            print("Failed to add booking to a customer.")
+            return False
 
-    return True
+        return True
+    print("[SERVER] Term is colliding.")
+    return False
 
 
 def list_all_bookings(customer_id: str):

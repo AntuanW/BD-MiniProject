@@ -22,6 +22,9 @@ if __name__ == '__main__':
     # add_customer("Jacek", "Długopolski", "test@test.pl", "fpga")
     # add_customer("Jan", "Małopolski", "test@test.pl", "fpga")
     # set_password("646c904b44697a21f43d223d", "test")
-    add_new_booking("646c904b44697a21f43d223d", "646c886fc25694ae5532b750", datetime(2023, 5, 16), datetime(2023, 5, 30))
+    add_new_booking("646c901812082ee1f12148fe", "646c886fc25694ae5532b750", datetime(2023, 5, 11), datetime(2023, 5, 16))
     # add_validators()
+    # add_room("646c853b0436f81e3501b112", 4, 2, 160.0)
+    # set_password("646c901812082ee1f12148fe", "fpga123")
+    # add_customer("Piotr", "Faliszewski", "test-test.pl", "toizo")
     pass
