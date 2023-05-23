@@ -17,7 +17,6 @@ Technologia:
 
 # Propozycja bazy danych:
 
-## Kolekcje:
 ### Hotels
 ```
 {  
@@ -139,7 +138,9 @@ Technologia:
         bsonType: 'int'
       },
       price_per_night: {
-        bsonType: 'double'
+        bsonType: 'double',
+        minimum: 0,
+        exclusiveMinimum: true
       },
       is_available: {
         bsonType: 'bool'
@@ -148,11 +149,6 @@ Technologia:
         bsonType: 'array',
         items: {
           bsonType: 'object',
-          required: [
-            'booking_id',
-            'date_from',
-            'date_to'
-          ],
           properties: {
             booking_id: {
               bsonType: 'objectId'
@@ -166,39 +162,7 @@ Technologia:
           }
         }
       }
-    },
-    allOf: [
-      {
-        anyOf: [
-          {
-            not: {
-              properties: {
-                bookings: {
-                  items: {
-                    type: 'object'
-                  }
-                }
-              }
-            }
-          },
-          {
-            properties: {
-              bookings: {
-                items: {
-                  not: {
-                    required: [
-                      'booking_id',
-                      'date_from',
-                      'date_to'
-                    ]
-                  }
-                }
-              }
-            }
-          }
-        ]
-      }
-    ]
+    }
   }
 }
 ```
@@ -234,11 +198,6 @@ Technologia:
         ],
         items: {
           bsonType: 'object',
-          required: [
-            'room_id',
-            'check_in_date',
-            'check_out_date'
-          ],
           properties: {
             room_id: {
               bsonType: 'objectId'
@@ -252,39 +211,7 @@ Technologia:
           }
         }
       }
-    },
-    allOf: [
-      {
-        anyOf: [
-          {
-            not: {
-              properties: {
-                bookings: {
-                  items: {
-                    type: 'object'
-                  }
-                }
-              }
-            }
-          },
-          {
-            properties: {
-              bookings: {
-                items: {
-                  not: {
-                    required: [
-                      'room_id',
-                      'check_in_date',
-                      'check_out_date'
-                    ]
-                  }
-                }
-              }
-            }
-          }
-        ]
-      }
-    ]
+    }
   }
 }
 ```
