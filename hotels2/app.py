@@ -44,15 +44,15 @@ if __name__ == '__main__':
 
 
     # create_data()
-    print(can_be_booked(ObjectId("646cf9f8e31893a53be72ec7"), datetime(2023, 5, 18), datetime(2023, 5, 20)))
-    print(can_be_booked(ObjectId("646cf9f8e31893a53be72ec7"), datetime(2023, 5, 15), datetime(2023, 5, 16)))
-    print(can_be_booked(ObjectId("646cf9f8e31893a53be72ec7"), datetime(2023, 5, 12), datetime(2023, 5, 14)))
-    print(can_be_booked(ObjectId("646cf9f8e31893a53be72ec7"), datetime(2023, 5, 20), datetime(2023, 5, 23)))
-    print(can_be_booked(ObjectId("646cf9f8e31893a53be72ec7"), datetime(2023, 5, 11), datetime(2023, 5, 13)))
-    print(can_be_booked(ObjectId("646cf9f8e31893a53be72ec7"), datetime(2023, 5, 22), datetime(2023, 5, 25)))
-    print(can_be_booked(ObjectId("646cf9f8e31893a53be72ec7"), datetime(2023, 5, 10), datetime(2023, 5, 12)))
-    print(can_be_booked(ObjectId("646cf9f8e31893a53be72ec7"), datetime(2023, 5, 25), datetime(2023, 5, 30)))
+    print(can_be_booked(ObjectId("646cf9f8e31893a53be72ec7"), datetime(2023, 5, 18), datetime(2023, 5, 20)))    # false
+    print(can_be_booked(ObjectId("646cf9f8e31893a53be72ec7"), datetime(2023, 5, 15), datetime(2023, 5, 16)))    # false
+    print(can_be_booked(ObjectId("646cf9f8e31893a53be72ec7"), datetime(2023, 5, 12), datetime(2023, 5, 14)))    # false
+    print(can_be_booked(ObjectId("646cf9f8e31893a53be72ec7"), datetime(2023, 5, 20), datetime(2023, 5, 23)))    # false
+    print(can_be_booked(ObjectId("646cf9f8e31893a53be72ec7"), datetime(2023, 5, 11), datetime(2023, 5, 13)))    # true
+    print(can_be_booked(ObjectId("646cf9f8e31893a53be72ec7"), datetime(2023, 5, 22), datetime(2023, 5, 25)))    # true
+    print(can_be_booked(ObjectId("646cf9f8e31893a53be72ec7"), datetime(2023, 5, 10), datetime(2023, 5, 12)))    # true
+    print(can_be_booked(ObjectId("646cf9f8e31893a53be72ec7"), datetime(2023, 5, 25), datetime(2023, 5, 30)))    # true
 
-
+    # can_be_booked(ObjectId("646cf9f8e31893a53be72ec7"), datetime(2023, 5, 18), datetime(2023, 5, 20))
     # add_new_booking("646cfa23a2874ff1ffd18faf", "646cf9f8e31893a53be72ec7", datetime(2023, 5, 15), datetime(2023, 5, 22))
     pass

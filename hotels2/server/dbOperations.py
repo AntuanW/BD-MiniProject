@@ -211,49 +211,12 @@ def can_be_booked(room_id: ObjectId, check_in: datetime, check_out: datetime):
         print("Check in date must be less than check out date.")
         return False
 
-    # rooms_ = mongo.rooms.find({
-    #     "_id": room_id,
-    #     "is_available": True,
-    #     "bookings": {
-    #         "$not": {
-    #             "$elemMatch": {
-    #                 "$or": [
-    #                     {
-    #                         "date_from": {"$gte": check_out}
-    #                     },
-    #                     {
-    #                         "date_to": {"$lte": check_in}
-    #                     }
-    #                 ]
-    #             }
-    #         },
-    #         "$ne": []
-    #     }
-    # })
-    rooms_ = mongo.rooms.find({
-        "_id": room_id,
-        "is_available": True,
-        "$nor": [
-            {
-                "bookings": {
-                    "$elemMatch": {
-                        "$or": [
-                            {"date_from": {"$gte": check_out}},
-                            {"date_to": {"$lte": check_in}}
-                        ]
-                    }
-                }
-            },
-            {
-                "bookings": []
-            }
-        ]
-    })
-
-    list_ = list(rooms_)
-    pprint.pprint(list_)
-    if list_:
-        return False
+    room = mongo.rooms.find_one({"_id": room_id, "is_available": True})
+    for booking in room['bookings']:
+        if booking['date_from'] >= check_out or booking['date_to'] <= check_in:
+            pass
+        else:
+            return False
     return True
 
 
