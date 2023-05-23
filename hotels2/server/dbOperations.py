@@ -28,42 +28,59 @@ def add_hotel(name: str, street: str, city: str, zip_code: str):
         mongo.hotels.insert_one(new_hotel.to_dict())
         return True
     else:
-        print("Invalid zip code format. The format is: xxxxx")
+        print("[SERVER] Invalid zip code format. The format is: xxxxx")
         return False
 
 
 def remove_hotel(hotel_id: str):
-    _id = ObjectId(hotel_id)
+    try:
+        _id = ObjectId(hotel_id)
+    except Exception as e:
+        print("[SERVER]", e)
+        return False
     res1 = mongo.hotels.delete_one({"_id": _id})
     res2 = mongo.rooms.delete_many({"hotel_id": _id})
     print("[SERVER] Removed:", res1.deleted_count, "hotels")
     print("[SERVER] Removed:", res2.deleted_count, "rooms")
+    return True
 
 
 def get_all_hotels():
     hotels = mongo.hotels.find()
     hotels = list(hotels)
     if len(hotels):
-        print("Currently there is no hotels in the database.")
+        print("[SERVER] No hotels in the database.")
     return hotels
 
 
 # ### Rooms methods ###
 def add_room(hotel_id: str, room_type: int, room_number: int, ppn, availability: bool = True):
-    _id = ObjectId(hotel_id)
-    count = mongo.rooms.count_documents({"room_number": room_number})
+    try:
+        _id = ObjectId(hotel_id)
+    except Exception as e:
+        print("[SERVER]", e)
+        return False
 
+    count = mongo.rooms.count_documents({"room_number": room_number})
     if count > 0:
-        print("[SERVER] Room number", room_number, " already exists.")
+        print("[SERVER] Room number", room_number, "already exists.")
+        return False
     else:
         new_room = Room(_id, room_type, room_number, float(ppn), availability)
         mongo.rooms.insert_one(new_room.to_dict())
+        return True
 
 
 def remove_room(room_id: str):
-    _id = ObjectId(room_id)
+    try:
+        _id = ObjectId(room_id)
+    except Exception as e:
+        print("[SERVER]", e)
+        return False
+
     res = mongo.rooms.delete_one({"_id": _id})
     print("[SERVER] Removed:", res.deleted_count, "elements")
+    return True
 
 
 def get_all_rooms():
@@ -77,7 +94,12 @@ def get_all_rooms():
 
 def get_all_rooms_of_specific_hotel(hotel_id: str):
     # TODO: maybe remove it and make it into filters
-    _id = ObjectId(hotel_id)
+    try:
+        _id = ObjectId(hotel_id)
+    except Exception as e:
+        print("[SERVER]", e)
+        return False
+
     rooms = mongo.rooms.find({"hotel_id": _id, "is_available": True})
     if rooms is None:
         print("There is no hotel with such id in the database.")
@@ -86,7 +108,12 @@ def get_all_rooms_of_specific_hotel(hotel_id: str):
 
 
 def set_price_per_night(room_id: str, new_price):
-    _id = ObjectId(room_id)
+    try:
+        _id = ObjectId(room_id)
+    except Exception as e:
+        print("[SERVER]", e)
+        return False
+
     price_update = {
         "$set": {"price_per_night": float(new_price)}
     }
@@ -99,16 +126,20 @@ def set_price_per_night(room_id: str, new_price):
     except Exception as e:
         print("[SERVER] Validation failed")
         pprint.pprint(e)
-    return False
+        return False
 
 
 def set_availability(room_id: str, availability: bool):
-    _id = ObjectId(room_id)
+    try:
+        _id = ObjectId(room_id)
+    except Exception as e:
+        print("[SERVER]", e)
+        return False
+
     availability_update = {
         "$set": {"is_available": availability}
     }
     update = mongo.rooms.update_one({"_id": _id}, availability_update)
-
     if update.matched_count <= 0:
         print("[SERVER] No room with such id")
         return False
@@ -142,15 +173,25 @@ def add_customer(name: str, surname: str, mail: str, passwd: str):
 
 
 def remove_customer(customer_id):
-    _id = ObjectId(customer_id)
+    try:
+        _id = ObjectId(customer_id)
+    except Exception as e:
+        print("[SERVER]", e)
+        return False
+
     res = mongo.customers.delete_one({"_id": _id})
     print("[SERVER] Removed:", res.deleted_count, "elements")
+    return True
 
 
 def set_password(customer_id, new_password):
-    _id = ObjectId(customer_id)
-    old_password = mongo.customers.find_one({"_id": _id})
+    try:
+        _id = ObjectId(customer_id)
+    except Exception as e:
+        print("[SERVER]", e)
+        return False
 
+    old_password = mongo.customers.find_one({"_id": _id})
     if old_password.get("password") == new_password:
         print("[SERVER] New password cannot be the same as the old one.")
         return False
@@ -159,11 +200,9 @@ def set_password(customer_id, new_password):
         "$set": {"password": new_password}
     }
     update = mongo.customers.update_one({"_id": _id}, password_update)
-
     if update.matched_count <= 0:
         print("[SERVER] Failed to set new password. There is no customer with such id in the database.")
         return False
-
     return True
 
 
@@ -256,5 +295,3 @@ def change_booking_date():
     # 2. if true -> change dates in both bookings
     # 3. else -> return a proper information
     pass
-
-# todo tryfunc
