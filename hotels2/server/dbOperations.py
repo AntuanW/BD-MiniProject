@@ -206,35 +206,62 @@ def set_password(customer_id, new_password):
     return True
 
 
-def add_new_booking(customer_id: str, room_id: str, check_in: datetime, check_out: datetime):
-    customer_id = ObjectId(customer_id)
-    room_id = ObjectId(room_id)
-
+def can_be_booked(room_id: ObjectId, check_in: datetime, check_out: datetime):
     if check_in >= check_out:
         print("Check in date must be less than check out date.")
         return False
 
-    # TODO: przetestowac
-    # jak jest pusty to termin nachodzi
+    # rooms_ = mongo.rooms.find({
+    #     "_id": room_id,
+    #     "is_available": True,
+    #     "bookings": {
+    #         "$not": {
+    #             "$elemMatch": {
+    #                 "$or": [
+    #                     {
+    #                         "date_from": {"$gte": check_out}
+    #                     },
+    #                     {
+    #                         "date_to": {"$lte": check_in}
+    #                     }
+    #                 ]
+    #             }
+    #         },
+    #         "$ne": []
+    #     }
+    # })
     rooms_ = mongo.rooms.find({
         "_id": room_id,
         "is_available": True,
-        "bookings": {
-            "$elemMatch": {
-                "$or": [
-                    {
-                        "date_from": {"$gte": check_out}
-                    },
-                    {
-                        "date_to": {"$lte": check_in}
+        "$nor": [
+            {
+                "bookings": {
+                    "$elemMatch": {
+                        "$or": [
+                            {"date_from": {"$gte": check_out}},
+                            {"date_to": {"$lte": check_in}}
+                        ]
                     }
-                ]
+                }
+            },
+            {
+                "bookings": []
             }
-        }
+        ]
     })
-    pprint.pprint(list(rooms_))
 
-    if not rooms_:
+    list_ = list(rooms_)
+    pprint.pprint(list_)
+    if list_:
+        return False
+    return True
+
+
+def add_new_booking(customer_id: str, room_id: str, check_in: datetime, check_out: datetime):
+    customer_id = ObjectId(customer_id)
+    room_id = ObjectId(room_id)
+
+    if can_be_booked(room_id, check_in, check_out):
         customer_booking = {
             "room_id": room_id,
             "check_in_date": check_in,
@@ -279,3 +306,17 @@ def change_booking_date():
     # 2. if true -> change dates in both bookings
     # 3. else -> return a proper information
     pass
+
+'''
+check_in, check_out - argumenty funkcji sprawdzającej możliwość rezerwacji
+from, to - pola w bazie danych
+
+find musi znaleźć:
+check_in < from and check_out > from
+or
+check_in >= from and check_out <= to
+or
+check_in < to and check_out >= to
+or
+check_in <= from and check_out >= to
+'''
