@@ -53,7 +53,7 @@ Technologia:
     "surname": string,  
     "email": string,  
     "bookings": [ {  
-        "roomId": ObjectId,  
+        "room_id": ObjectId,  
         "check_in_date": string,  
         "check_out_date": string  
     } ],

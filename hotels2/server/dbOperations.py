@@ -225,13 +225,16 @@ def add_hotel(name: str, street: str, city: str, zip_code: str):
     if result:
         new_hotel = Hotel(name, street, city, zip_code)
         mongo.hotels.insert_one(new_hotel.to_dict())
+        return True
     else:
         print("Invalid zip code format. The format is: xxxxx")
+        return False
 
 
 def remove_hotel(hotel_id: str):
     _id = ObjectId(hotel_id)
     mongo.hotels.delete_one({"_id": _id})
+    # TODO: remove all rooms of given hotel
 
 
 def get_all_hotels():
@@ -255,6 +258,7 @@ def remove_room(room_id: str):
 
 
 def get_all_rooms():
+    # TODO: maybe remove it and make it into filters
     rooms = mongo.rooms.find({"is_available": True})
     rooms = list(rooms)
     if len(rooms) == 0:
@@ -263,6 +267,7 @@ def get_all_rooms():
 
 
 def get_all_rooms_of_specific_hotel(hotel_id: str):
+    # TODO: maybe remove it and make it into filters
     _id = ObjectId(hotel_id)
     rooms = mongo.rooms.find({"hotel_id": _id, "is_available": True})
     if rooms is None:
@@ -280,6 +285,8 @@ def set_price_per_night(room_id: str, new_price: float):
 
     if update.matched_count <= 0:
         print("Failed to set nie price per night. There is no room with such id in the database.")
+        return False
+    return True
 
 
 def set_availability(room_id: str, availability: bool):
@@ -291,49 +298,100 @@ def set_availability(room_id: str, availability: bool):
 
     if update.matched_count <= 0:
         print("Failed to set availability. There is no room with such id in the database.")
+        return False
+    return True
 
 
 def get_specific_rooms(in_date: date, out_date: date, room_type: int):
-    # specific_rooms = mongo.rooms.find({
-    #     "room_type": room_type,
-    #     "is_available": True,
-    #     "$and": [
-    #         {
-    #             "check_in_date": {"$gte": in_date}
-    #         },
-    #         {
-    #             "check_out_date": {"$lte": out_date}
-    #         }
-    #     ]
-    # })
-    # return list(specific_rooms)
+    pass
+
+
+def check_room_availability():
     pass
 
 
 # ### Customers methods ###
-def add_customer():
-    pass
+def add_customer(name: str, surname: str, mail: str, passwd: str):
+    email_pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+    result = re.match(email_pattern, mail)
+
+    if result:
+        new_customer = Customer(name, surname, mail, passwd)
+        mongo.customers.insert_one(new_customer.to_dict())
+        return True
+    else:
+        print("Invalid email format, try - (string1)@(string2).(2+characters)")
+        return False
 
 
-def remove_customer():
-    pass
+def remove_customer(customer_id):
+    _id = ObjectId(customer_id)
+    mongo.customers.delete_one({"_id": _id})
 
 
-def set_password():
-    pass
+def set_password(customer_id, new_password):
+    # TODO: check if new and old password are the same
+    _id = ObjectId(customer_id)
+    password_update = {
+        "$set": {"password": new_password}
+    }
+    update = mongo.rooms.update_one({"_id": _id}, password_update)
+
+    if update.matched_count <= 0:
+        print("Failed to set new password. There is no customer with such id in the database.")
+        return False
+
+    return True
 
 
-def add_new_booking():
-    pass
+def add_new_booking(customer_id: str, room_id: str, check_in: date, check_out: date):
+    customer_id = ObjectId(customer_id)
+    room_id = ObjectId(room_id)
+
+    if check_in >= check_out:
+        print("Check in date must be less than check out date.")
+        return False
+
+    # TODO: check if room is available on 100%
+
+    customer_booking = {
+        "room_id": room_id,
+        "check_in_date": check_in,
+        "check_out_date": check_out
+    }
+
+    room_booking = {
+        "booking_id": customer_id,
+        "date_from": check_in,
+        "date_to": check_out
+    }
+
+    room_update = mongo.rooms.update_one({"_id": room_id}, {"$push": {"bookings": room_booking}})
+    if room_update.matched_count <= 0:
+        print("Failed to add booking to a room.")
+        return False
+
+    customer_update = mongo.customers.update_one({"_id": customer_id}, {"$push": {"bookings": customer_booking}})
+    if customer_update.matched_count <= 0:
+        print("Failed to add booking to a customer.")
+        return False
+
+    return True
 
 
-def list_all_bookings():
+def list_all_bookings(customer_id: str):
     pass
 
 
 def change_room():
+    # 1. check if new room is free during that period of time
+    # 2. if true -> change (remove from room bookings and update room_id in customer bookings)
+    # 3. else -> return a proper information
     pass
 
 
 def change_booking_date():
+    # 1. check if current room is available during new period of time
+    # 2. if true -> change dates in both bookings
+    # 3. else -> return a proper information
     pass
