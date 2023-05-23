@@ -48,7 +48,6 @@ room_validator = {
                 "bsonType": "array",
                 "items": {
                     "bsonType": "object",
-                    "required": ["booking_id", "date_from", "date_to"],
                     "properties": {
                         "booking_id": {
                             "bsonType": "objectId"
@@ -62,16 +61,7 @@ room_validator = {
                     }
                 }
             }
-        },
-        "allOf": [
-            {
-                "anyOf": [
-                    {"not": {"properties": {"bookings": {"items": {"type": "object"}}}}},
-                    {"properties": {
-                        "bookings": {"items": {"not": {"required": ["booking_id", "date_from", "date_to"]}}}}}
-                ]
-            }
-        ]
+        }
     }
 }
 
@@ -96,10 +86,9 @@ customer_validator = {
                 "bsonType": ["array"],
                 "items": {
                     "bsonType": "object",
-                    "required": ["room_id", "check_in_date", "check_out_date"],
                     "properties": {
                         "room_id": {
-                            "bsonType": "objectId"
+                            "bsonType": "objectId",
                         },
                         "check_in_date": {
                             "bsonType": "date"
@@ -110,16 +99,7 @@ customer_validator = {
                     }
                 }
             }
-        },
-        "allOf": [
-            {
-                "anyOf": [
-                    {"not": {"properties": {"bookings": {"items": {"type": "object"}}}}},
-                    {"properties": {
-                        "bookings": {"items": {"not": {"required": ["room_id", "check_in_date", "check_out_date"]}}}}}
-                ]
-            }
-        ]
+        }
     }
 }
 

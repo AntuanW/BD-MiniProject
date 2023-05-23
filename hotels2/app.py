@@ -23,4 +23,5 @@ if __name__ == '__main__':
     # add_customer("Jan", "Małopolski", "test@test.pl", "fpga")
     # set_password("646c904b44697a21f43d223d", "test")
     add_new_booking("646c904b44697a21f43d223d", "646c886fc25694ae5532b750", datetime(2023, 5, 16), datetime(2023, 5, 30))
+    # add_validators()
     pass
