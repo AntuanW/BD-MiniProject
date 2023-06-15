@@ -232,7 +232,7 @@ def add_new_booking(customer_id: str, room_id: str, check_in: datetime, check_ou
         }
 
         room_booking = {
-            "booking_id": customer_id,
+            "customer_id": customer_id,
             "date_from": check_in,
             "date_to": check_out
         }
@@ -279,7 +279,7 @@ def change_room(customer_id: str, old_room: str, new_room: str, check_in: dateti
         }
 
         room_booking = {
-            "booking_id": ObjectId(customer_id),
+            "customer_id": ObjectId(customer_id),
             "date_from": check_in,
             "date_to": check_out
         }

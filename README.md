@@ -37,7 +37,7 @@ Technologia:
     "is_available": boolean,
     "bookings": [
       {
-        "booking_id": ObjectId(),
+        "customer_id": ObjectId,
         "date_from": date,
         "date_to": date
       }
@@ -54,9 +54,19 @@ Technologia:
     "bookings": [ {  
         "room_id": ObjectId,  
         "check_in_date": string,  
-        "check_out_date": string  
+        "check_out_date": string
     } ],
     "password": string
+}
+```
+
+### Bookings_logs
+```
+{
+  "customer_id": ObjectId,
+  "room_id": ObjectId,
+  "date_from": date,
+  "date_to": date
 }
 ```
 

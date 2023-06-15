@@ -49,7 +49,7 @@ room_validator = {
                 "items": {
                     "bsonType": "object",
                     "properties": {
-                        "booking_id": {
+                        "customer_id": {
                             "bsonType": "objectId"
                         },
                         "date_from": {

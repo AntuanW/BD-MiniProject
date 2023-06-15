@@ -8,17 +8,6 @@ from datetime import datetime
 # app = create_app()
 
 
-def create_data():
-    # add_hotel('Marina Resort', 'Bulwar Nadmorski 10', 'Gdynia', '81001')
-    # add_room("646cf9e0c4ab2ad0c9bb1db5", 2, 1, 150)
-    # add_room("646cf9e0c4ab2ad0c9bb1db5", 3, 2, 300)
-    # add_room("646cf9e0c4ab2ad0c9bb1db5", 4, 3, 450)
-    # add_customer("Jacek", "Długopolski", "test@test.pl", "fpga")
-    # add_customer("Jan", "Małopolski", "test@test.edu.pl", "fpga123")
-    # add_customer("Piotr", "Faliszewski", "test@test.agh.pl", "toizo")
-    pass
-
-
 if __name__ == '__main__':
     # app.run(debug=True)
     # add_hotel('Marina Resort', 'Bulwar Nadmorski 10', 'Gdynia', '81001')
@@ -56,5 +45,5 @@ if __name__ == '__main__':
     # can_be_booked(ObjectId("646cf9f8e31893a53be72ec7"), datetime(2023, 5, 18), datetime(2023, 5, 20))
     # add_new_booking("646cfa23a2874ff1ffd18faf", "646cf9f8e31893a53be72ec7", datetime(2023, 5, 15), datetime(2023, 5, 22))
     # print(get_all_hotels())
-    print(list_all_bookings("646cfa23a2874ff1ffd18fad"))
+    # print(list_all_bookings("646cfa23a2874ff1ffd18fad"))
     pass
