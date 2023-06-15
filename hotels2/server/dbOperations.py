@@ -48,7 +48,7 @@ def remove_hotel(hotel_id: str):
 def get_all_hotels():
     hotels = mongo.hotels.find()
     hotels = list(hotels)
-    if len(hotels):
+    if not len(hotels):
         print("[SERVER] No hotels in the database.")
     return hotels
 
@@ -239,12 +239,12 @@ def add_new_booking(customer_id: str, room_id: str, check_in: datetime, check_ou
 
         room_update = mongo.rooms.update_one({"_id": room_id}, {"$push": {"bookings": room_booking}})
         if room_update.matched_count <= 0:
-            print("Failed to add booking to a room.")
+            print("[SERVER] Failed to add booking to a room.")
             return False
 
         customer_update = mongo.customers.update_one({"_id": customer_id}, {"$push": {"bookings": customer_booking}})
         if customer_update.matched_count <= 0:
-            print("Failed to add booking to a customer.")
+            print("[SERVER] Failed to add booking to a customer.")
             return False
         print("[SERVER] Term is OK.")
         return True
@@ -254,14 +254,52 @@ def add_new_booking(customer_id: str, room_id: str, check_in: datetime, check_ou
 
 
 def list_all_bookings(customer_id: str):
-    pass
+    try:
+        _id = ObjectId(customer_id)
+    except Exception as e:
+        print("[SERVER]", e)
+        return False
+
+    bookings = mongo.customers.find_one({"_id": _id})
+    return bookings['bookings']
 
 
-def change_room():
+def change_room(customer_id: str, old_room: str, new_room: str, check_in: datetime, check_out: datetime):
     # 1. check if new room is free during that period of time
+    if can_be_booked(ObjectId(new_room), check_in, check_out):
+        # remove from customers bookings
+
+        # remove from rooms booking
+
+        # book new room
+        customer_booking = {
+            "room_id": ObjectId(new_room),
+            "check_in_date": check_in,
+            "check_out_date": check_out
+        }
+
+        room_booking = {
+            "booking_id": ObjectId(customer_id),
+            "date_from": check_in,
+            "date_to": check_out
+        }
+        room_update = mongo.rooms.update_one({"_id": ObjectId(new_room)}, {"$push": {"bookings": room_booking}})
+        if room_update.matched_count <= 0:
+            print("[SERVER] Failed to add booking to a room.")
+            return False
+
+        customer_update = mongo.customers.update_one({"_id": customer_id}, {"$push": {"bookings": customer_booking}})
+        if customer_update.matched_count <= 0:
+            print("[SERVER] Failed to add booking to a customer.")
+            return False
+        print("[SERVER] Term is OK.")
+        return True
+        pass
+    else:
+        print("[SERVER] You cannot change the booking to this specific room")
+        return False
     # 2. if true -> change (remove from room bookings and update room_id in customer bookings)
     # 3. else -> return a proper information
-    pass
 
 
 def change_booking_date():
