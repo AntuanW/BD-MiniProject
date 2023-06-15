@@ -62,7 +62,7 @@ def add_room(hotel_id: str, room_type: int, room_number: int, ppn, availability:
         print("[SERVER]", e)
         return False
 
-    count = mongo.rooms.count_documents({"room_number": room_number})
+    count = mongo.rooms.count_documents({"hotel_id": _id, "room_number": room_number})
     if count > 0:
         print("[SERVER] Room number", room_number, "already exists.")
         return False

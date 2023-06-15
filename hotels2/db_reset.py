@@ -53,5 +53,21 @@ def reset_db():
         add_customer(names[i], surnames[i], mails[i], passwds[i])
 
 
-clear_db()
-reset_db()
+def add_example_bookings():
+    add_new_booking("648b44e51905fb3623930785", "648b44e51905fb362393077b",
+                    datetime(2023, 6, 25), datetime(2023, 6, 30))
+    add_new_booking("648b44e51905fb3623930785", "648b44e51905fb362393077c",
+                    datetime(2023, 7, 15), datetime(2023, 7, 25))
+    add_new_booking("648b44e51905fb3623930786", "648b44e51905fb362393077c",
+                    datetime(2023, 7, 1), datetime(2023, 7, 10))
+    add_new_booking("648b44e51905fb3623930787", "648b44e51905fb362393077d",
+                    datetime(2023, 8, 1), datetime(2023, 8, 3))
+    add_new_booking("648b44e51905fb3623930788", "648b44e51905fb362393077e",
+                    datetime(2023, 6, 21), datetime(2023, 7, 1))
+    add_new_booking("648b44e51905fb3623930789", "648b44e51905fb362393077c",
+                    datetime(2023, 7, 10), datetime(2023, 7, 14))
+
+
+# add_example_bookings()
+# clear_db()
+# reset_db()
