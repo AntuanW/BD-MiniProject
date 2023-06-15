@@ -220,12 +220,14 @@ def add_new_booking(customer_id: str, room_id: str, check_in: datetime, check_ou
 
     if can_be_booked(room_id, check_in, check_out):
         customer_booking = {
+            "booking_id": ObjectId(),
             "room_id": room_id,
-            "check_in_date": check_in,
-            "check_out_date": check_out
+            "date_from": check_in,
+            "date_to": check_out
         }
 
         room_booking = {
+            "booking_id": ObjectId(),
             "customer_id": customer_id,
             "date_from": check_in,
             "date_to": check_out
@@ -258,42 +260,22 @@ def list_all_bookings(customer_id: str):
     return bookings['bookings']
 
 
-def change_room(customer_id: str, old_room: str, new_room: str, check_in: datetime, check_out: datetime):
+def change_booking(customer_id: str, booking_id: str, check_in: datetime, check_out: datetime):
     # 1. check if new room is free during that period of time
-    if add_new_booking(customer_id, new_room, check_in, check_out):
-        # remove from customers bookings
-        mongo.customers.update_one({"_id": ObjectId(customer_id)}, {
-            "$pull": {
-                "bookings": {"room_id": ObjectId(old_room)}
-            }
-        })
-        # remove from rooms booking
-        mongo.rooms.update_one({"_id": ObjectId(old_room)}, {
-            "$pull": {
-                "bookings": {"customer_id": ObjectId(customer_id)}
-            }
-        })
-    else:
-        print("[SERVER] You cannot change the booking to this specific room")
-        return False
-
-
-def change_booking_date():
-    # 1. check if current room is available during new period of time
-    # 2. if true -> change dates in both bookings
-    # 3. else -> return a proper information
+    # if add_new_booking(customer_id, new_room, check_in, check_out):
+    #     # remove from customers bookings
+    #     mongo.customers.update_one({"_id": ObjectId(customer_id)}, {
+    #         "$pull": {
+    #             "bookings": {"room_id": ObjectId(old_room)}
+    #         }
+    #     })
+    #     # remove from rooms booking
+    #     mongo.rooms.update_one({"_id": ObjectId(old_room)}, {
+    #         "$pull": {
+    #             "bookings": {"customer_id": ObjectId(customer_id)}
+    #         }
+    #     })
+    # else:
+    #     print("[SERVER] You cannot change the booking to this specific room")
+    #     return False
     pass
-
-'''
-check_in, check_out - argumenty funkcji sprawdzającej możliwość rezerwacji
-from, to - pola w bazie danych
-
-find musi znaleźć:
-check_in < from and check_out > from
-or
-check_in >= from and check_out <= to
-or
-check_in < to and check_out >= to
-or
-check_in <= from and check_out >= to
-'''
