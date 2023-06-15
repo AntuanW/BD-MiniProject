@@ -6,14 +6,6 @@ class Customer:
         self.bookings = []
         self.password = password
 
-    def add_booking(self, room_id, check_in_date, check_out_date):
-        booking = {
-            "room_id": room_id,
-            "check_in_date": check_in_date,
-            "check_out_date": check_out_date
-        }
-        self.bookings.append(booking)
-
     def to_dict(self):
         return {
             "name": self.name,

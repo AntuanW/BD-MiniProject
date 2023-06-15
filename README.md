@@ -37,6 +37,7 @@ Technologia:
     "is_available": boolean,
     "bookings": [
       {
+        "booking_id": ObjectId
         "customer_id": ObjectId,
         "date_from": date,
         "date_to": date
@@ -51,18 +52,20 @@ Technologia:
     "name": string,  
     "surname": string,  
     "email": string,  
-    "bookings": [ {  
+    "bookings": [ {
+        "booking_id": ObjectId <- generowanie automatyczne
         "room_id": ObjectId,  
-        "check_in_date": string,  
-        "check_out_date": string
+        "date_from": string,  
+        "date_to": string
     } ],
     "password": string
 }
 ```
 
-### Bookings_logs
+### Booking_logs
 ```
 {
+  "booking_id": ObjectId
   "customer_id": ObjectId,
   "room_id": ObjectId,
   "date_from": date,
