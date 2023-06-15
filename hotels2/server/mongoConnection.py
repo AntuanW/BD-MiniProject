@@ -19,3 +19,4 @@ class MongoConnection:
         self.customers: Collection = self.db["Customers"]
         self.hotels: Collection = self.db["Hotels"]
         self.rooms: Collection = self.db["Rooms"]
+        self.logs: Collection = self.db["Booking_Logs"]

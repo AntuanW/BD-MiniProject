@@ -16,6 +16,7 @@ def add_validators():
     mongo.db.command("collMod", "Rooms", validator=room_validator)
     mongo.db.command("collMod", "Hotels", validator=hotel_validator)
     mongo.db.command("collMod", "Customers", validator=customer_validator)
+    mongo.db.command("collMod", "Booking_Logs", validator=booking_logs_validator)
 
 
 # ### Hotels methods ###
