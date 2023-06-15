@@ -199,19 +199,52 @@ def set_password(customer_id, new_password):
     return True
 
 
-def can_be_booked(room_id: ObjectId, check_in: datetime, check_out: datetime):
-    # TODO change it into pipeline
+def can_be_booked(room_id: ObjectId, check_in: datetime, check_out: datetime, booking_id: ObjectId = None):
     if check_in >= check_out:
-        print("Check in date must be less than check out date.")
+        print("[SERVER] Check in date must be less than check out date.")
         return False
 
-    room = mongo.rooms.find_one({"_id": room_id, "is_available": True})
-    for booking in room['bookings']:
-        if booking['date_from'] >= check_out or booking['date_to'] <= check_in:
-            pass
-        else:
-            return False
-    return True
+    query = [
+        {
+            '$match': {
+                '_id': ObjectId(room_id)
+            }
+        },
+        {
+            '$project': {
+                '_id': 0,
+                'bookings': 1
+            }
+        },
+        {
+            '$unwind': '$bookings'
+        }
+    ]
+    if booking_id is not None:
+        query.append({
+            "$match": {
+                "bookings.booking_id": {'$nin': [ObjectId(booking_id)]}
+            }
+        })
+    query.append({
+        '$match': {
+            '$nor': [
+                {
+                    'bookings.date_from': {
+                        '$gte': check_out
+                    }
+                },
+                {
+                    'bookings.date_to': {
+                        '$lte': check_in
+                    }
+                }
+            ]
+        }
+    })
+
+    bookings = list(mongo.rooms.aggregate(query))
+    return len(bookings) == 0
 
 
 def add_new_booking(customer_id: str, room_id: str, check_in: datetime, check_out: datetime):

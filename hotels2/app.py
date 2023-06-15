@@ -20,5 +20,6 @@ if __name__ == '__main__':
     # remove_customer("648b4e9b273a6e78d1426ea1")
     # set_password("648b44e51905fb3623930789", "hd832r")
     # pprint.pprint(list_all_bookings("648b44e51905fb3623930785"))
+    pprint.pprint(can_be_booked(ObjectId("648b44e51905fb362393077c"), datetime(2023, 7, 1), datetime(2023, 7, 5), ObjectId('648b4a6492dececdfc9df7ed')))
     pass
 
