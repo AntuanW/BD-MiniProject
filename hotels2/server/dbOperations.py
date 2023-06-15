@@ -259,36 +259,18 @@ def list_all_bookings(customer_id: str):
 
 def change_room(customer_id: str, old_room: str, new_room: str, check_in: datetime, check_out: datetime):
     # 1. check if new room is free during that period of time
-    if can_be_booked(ObjectId(new_room), check_in, check_out):
+    if add_new_booking(customer_id, new_room, check_in, check_out):
         # remove from customers bookings
+        mongo.customers.update_one({"_id": ObjectId(customer_id)}, {
 
+        })
         # remove from rooms booking
+        mongo.rooms.update_one({"_id": ObjectId(old_room)}, {
 
-        # book new room
-        add_new_booking()
-
-        room_booking = {
-            "customer_id": ObjectId(customer_id),
-            "date_from": check_in,
-            "date_to": check_out
-        }
-        room_update = mongo.rooms.update_one({"_id": ObjectId(new_room)}, {"$push": {"bookings": room_booking}})
-        if room_update.matched_count <= 0:
-            print("[SERVER] Failed to add booking to a room.")
-            return False
-
-        customer_update = mongo.customers.update_one({"_id": customer_id}, {"$push": {"bookings": customer_booking}})
-        if customer_update.matched_count <= 0:
-            print("[SERVER] Failed to add booking to a customer.")
-            return False
-        print("[SERVER] Term is OK.")
-        return True
-        pass
+        })
     else:
         print("[SERVER] You cannot change the booking to this specific room")
         return False
-    # 2. if true -> change (remove from room bookings and update room_id in customer bookings)
-    # 3. else -> return a proper information
 
 
 def change_booking_date():
