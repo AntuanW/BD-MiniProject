@@ -83,28 +83,28 @@ def remove_room(room_id: str):
     return True
 
 
-def get_all_rooms():
-    # TODO: maybe remove it and make it into filters
-    rooms = mongo.rooms.find({"is_available": True})
-    rooms = list(rooms)
-    if len(rooms) == 0:
-        print("No available rooms.")
-    return rooms
+# def get_all_rooms():
+#     # TODO: maybe remove it and make it into filters
+#     rooms = mongo.rooms.find({"is_available": True})
+#     rooms = list(rooms)
+#     if len(rooms) == 0:
+#         print("No available rooms.")
+#     return rooms
 
 
-def get_all_rooms_of_specific_hotel(hotel_id: str):
-    # TODO: maybe remove it and make it into filters
-    try:
-        _id = ObjectId(hotel_id)
-    except Exception as e:
-        print("[SERVER]", e)
-        return False
-
-    rooms = mongo.rooms.find({"hotel_id": _id, "is_available": True})
-    if rooms is None:
-        print("There is no hotel with such id in the database.")
-        return []
-    return list(rooms)
+# def get_all_rooms_of_specific_hotel(hotel_id: str):
+#     # TODO: maybe remove it and make it into filters
+#     try:
+#         _id = ObjectId(hotel_id)
+#     except Exception as e:
+#         print("[SERVER]", e)
+#         return False
+#
+#     rooms = mongo.rooms.find({"hotel_id": _id, "is_available": True})
+#     if rooms is None:
+#         print("There is no hotel with such id in the database.")
+#         return []
+#     return list(rooms)
 
 
 def set_price_per_night(room_id: str, new_price):
@@ -144,14 +144,6 @@ def set_availability(room_id: str, availability: bool):
         print("[SERVER] No room with such id")
         return False
     return True
-
-
-def get_specific_rooms(in_date: datetime, out_date: datetime, room_type: int):
-    pass
-
-
-def check_room_availability():
-    pass
 
 
 # ### Customers methods ###
@@ -207,6 +199,7 @@ def set_password(customer_id, new_password):
 
 
 def can_be_booked(room_id: ObjectId, check_in: datetime, check_out: datetime):
+    # TODO change it into pipeline
     if check_in >= check_out:
         print("Check in date must be less than check out date.")
         return False
@@ -272,11 +265,7 @@ def change_room(customer_id: str, old_room: str, new_room: str, check_in: dateti
         # remove from rooms booking
 
         # book new room
-        customer_booking = {
-            "room_id": ObjectId(new_room),
-            "check_in_date": check_in,
-            "check_out_date": check_out
-        }
+        add_new_booking()
 
         room_booking = {
             "customer_id": ObjectId(customer_id),
