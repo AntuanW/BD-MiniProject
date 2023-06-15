@@ -262,11 +262,15 @@ def change_room(customer_id: str, old_room: str, new_room: str, check_in: dateti
     if add_new_booking(customer_id, new_room, check_in, check_out):
         # remove from customers bookings
         mongo.customers.update_one({"_id": ObjectId(customer_id)}, {
-
+            "$pull": {
+                "bookings": {"room_id": ObjectId(old_room)}
+            }
         })
         # remove from rooms booking
         mongo.rooms.update_one({"_id": ObjectId(old_room)}, {
-
+            "$pull": {
+                "bookings": {"customer_id": ObjectId(customer_id)}
+            }
         })
     else:
         print("[SERVER] You cannot change the booking to this specific room")

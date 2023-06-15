@@ -46,4 +46,5 @@ if __name__ == '__main__':
     # add_new_booking("646cfa23a2874ff1ffd18faf", "646cf9f8e31893a53be72ec7", datetime(2023, 5, 15), datetime(2023, 5, 22))
     # print(get_all_hotels())
     # print(list_all_bookings("646cfa23a2874ff1ffd18fad"))
+
     pass
