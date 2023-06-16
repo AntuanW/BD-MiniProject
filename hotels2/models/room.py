@@ -6,13 +6,3 @@ class Room:
         self.price_per_night = price_per_night
         self.is_available = is_available
         self.bookings = []
-
-    def to_dict(self):
-        return {
-            "hotel_id": self.hotel_id,  # filter ==
-            "room_type": self.room_type,    # filter ==
-            "room_number": self.room_number,
-            "price_per_night": self.price_per_night,    # filter ><=
-            "is_available": self.is_available,
-            "bookings": self.bookings
-        }
