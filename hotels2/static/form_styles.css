@@ -1,0 +1,38 @@
+.signup-form{
+    align-items: center;
+    padding: 2em;
+    margin: 0 auto;
+    text-align: center;
+    width: 300px;
+}
+
+.signup-form h3{
+    font-size: 1.5rem;
+}
+
+.form-group{
+    margin: .5em auto;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    font-size: 1.2rem;
+}
+
+.submit-btn{
+    color: white;
+    font-size: 1.3rem;
+    padding: .3em .2em;
+    border: none;
+    border-radius: 10px;
+    background: #0f69ff;
+}
+
+.submit-btn:hover{
+    background: #0137ff;
+    cursor: pointer;
+}
+
+.form-group input{
+    padding: .3em;
+    outline: none;
+}
