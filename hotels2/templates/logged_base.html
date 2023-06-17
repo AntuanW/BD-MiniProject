@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/base_style.css">
+    <link rel="stylesheet" href="/static/form_styles.css">
+    <link
+            href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800&family=Press+Start+2P&display=swap"
+            rel="stylesheet">
+    <script src="https://kit.fontawesome.com/0146767ed2.js" crossorigin="anonymous"></script>
+    <title>TriVaGo</title>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-elem"><a id="home" href="/loggedin">Home</a></div>
+        <div class="nav-elem"><a id="rooms" href="/loggedin">Rooms selection</a></div>
+        <div class="nav-elem"><a id="reservations" href="/loggedin">My Reservations</a></div>
+        <div class="nav-elem"><a id="logout" href="/loggedin">Logout</a></div>
+    </nav>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                {% if category == 'error' %}
+                    <div class="alert error" role="alert">
+                        {{ message }}
+                    </div>
+                {% else %}
+                    <div class="alert success" role="alert">
+                        {{ message }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    {% block content %} {% endblock %}
+    <footer>
+        <ul class="footer-items">
+            <li class="footer-item title">OurName</li>
+            <li class="footer-item"><a href="mailto:email@gmail.com"><i class="fa-solid fa-envelope"></i>email@gmail.com</a></li>
+            <li class="footer-item"><a href="tel:555-0179"><i class="fa-solid fa-mobile-button"></i>Phone-Number: 123-456-789</a></li>
+        </ul>
+    </footer>
+</body>
+</html>

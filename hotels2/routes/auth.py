@@ -1,11 +1,24 @@
-from flask import Blueprint, render_template, request, flash
+from flask import Blueprint, render_template, request, flash, redirect, url_for
 from hotels2.server.dbOperations import *
+from werkzeug.security import generate_password_hash, check_password_hash
 import re
+from flask_login import login_user, login_required, logout_user, current_user
 auth = Blueprint('auth', __name__)
 
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+
+        user = mongo.customers.find_one({"email": email})
+        if user is None:
+            flash('There is no user with this email address.', category='error')
+        elif check_password_hash(user['password'], password):
+            return redirect(url_for('views.logged_home'))
+        else:
+            flash('Incorrect password.', category='error')
     return render_template("login.html")
 
 
@@ -31,6 +44,10 @@ def sign_up():
         elif password1 != password2:
             flash('Passwords do not match!', category='error')
         else:
-            flash('Account created successfully!', category='success')
+            if add_customer(name, surname, mail, generate_password_hash(password1, method='sha256')):
+                flash('Account created successfully!', category='success')
+                return redirect(url_for('views.logged_home'))
+            else:
+                flash('Creating account failed, this email is already taken!', category='error')
 
     return render_template("signup.html")
