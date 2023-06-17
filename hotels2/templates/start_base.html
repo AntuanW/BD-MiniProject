@@ -19,6 +19,23 @@
         <div class="nav-elem"><a id="login" href="/login">Login</a></div>
         <div class="nav-elem"><a id="signUp" href="/sign-up">Sign-Up</a></div>
     </nav>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                {% if category == 'error' %}
+                    <div class="alert error" role="alert">
+                        {{ message }}
+                    </div>
+                {% else %}
+                    <div class="alert success" role="alert">
+                        {{ message }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
     {% block content %} {% endblock %}
     <footer>
         <ul class="footer-items">

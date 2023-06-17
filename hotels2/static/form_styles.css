@@ -36,3 +36,16 @@
     padding: .3em;
     outline: none;
 }
+
+.alert{
+    text-align: center;
+    padding: 1em 0;
+}
+
+.error{
+    background: rgba(255,6,0,0.62);
+}
+
+.success{
+    background: rgba(34,143,14,0.79);
+}

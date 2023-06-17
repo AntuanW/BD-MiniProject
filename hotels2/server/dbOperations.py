@@ -124,20 +124,27 @@ def set_availability(room_id: str, availability: bool):
 
 # ### Customers methods ###
 def add_customer(name: str, surname: str, mail: str, passwd: str):
-    email_pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-    result = re.match(email_pattern, mail)
+    # email_pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+    # result = re.match(email_pattern, mail)
 
-    if result:
-        count = mongo.customers.count_documents({"email": mail})
-        if count > 0:
-            print("[SERVER] This email address is already taken.")
-            return False
-        new_customer = Customer(name, surname, mail, passwd)
-        mongo.customers.insert_one(vars(new_customer))
-        return True
-    else:
-        print("[SERVER] Invalid email format, try - (string1)@(string2).(2+characters)")
+    # if result:
+    #     count = mongo.customers.count_documents({"email": mail})
+    #     if count > 0:
+    #         print("[SERVER] This email address is already taken.")
+    #         return False
+    #     new_customer = Customer(name, surname, mail, passwd)
+    #     mongo.customers.insert_one(vars(new_customer))
+    #     return True
+    # else:
+    #     print("[SERVER] Invalid email format, try - (string1)@(string2).(2+characters)")
+    #     return False
+    count = mongo.customers.count_documents({"email": mail})
+    if count > 0:
+        print("[SERVER] This email address is already taken.")
         return False
+    new_customer = Customer(name, surname, mail, passwd)
+    mongo.customers.insert_one(vars(new_customer))
+    return True
 
 
 def remove_customer(customer_id):
