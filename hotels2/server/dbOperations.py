@@ -222,8 +222,9 @@ def can_be_booked(room_id: ObjectId, check_in: datetime, check_out: datetime, bo
     return len(bookings) == 0
 
 
-def push_bookings(booking_id: ObjectId, customer_id: ObjectId, room_id: ObjectId, check_in: datetime, check_out: datetime):
-    # TODO: check if it works
+def push_bookings(booking_id: ObjectId, customer_id: ObjectId, room_id: ObjectId, check_in: datetime,
+                  check_out: datetime):
+    # TODO: testing required
     booking_in_customers = {
         "booking_id": booking_id,
         "customer_id": room_id,
@@ -252,91 +253,82 @@ def push_bookings(booking_id: ObjectId, customer_id: ObjectId, room_id: ObjectId
 
 
 def add_new_booking(customer_id: str, room_id: str, check_in: datetime, check_out: datetime):
-    # TODO: check if it works
+    # TODO: testing required
     if can_be_booked(ObjectId(room_id), check_in, check_out):
         booking_id = ObjectId()
         return push_bookings(booking_id, ObjectId(customer_id), ObjectId(room_id), check_in, check_out)
-        # booking_in_customers = {
-        #     "booking_id": booking_id,
-        #     "customer_id": ObjectId(customer_id),
-        #     "date_from": check_in,
-        #     "date_to": check_out
-        # }
-        # booking_in_rooms = {
-        #     "booking_id": booking_id,
-        #     "room_id": ObjectId(room_id),
-        #     "date_from": check_in,
-        #     "date_to": check_out
-        # }
-        #
-        # room_update = mongo.rooms.update_one({"_id": room_id}, {"$push": {"bookings": booking_in_rooms}})
-        # if room_update.matched_count <= 0:
-        #     print("[SERVER] Failed to add booking to a room.")
-        #     return False
-        #
-        # customer_update = mongo.customers.update_one({"_id": customer_id},
-        #                                              {"$push": {"bookings": booking_in_customers}})
-        # if customer_update.matched_count <= 0:
-        #     print("[SERVER] Failed to add booking to a customer.")
-        #     return False
-        # print("[SERVER] Successfully booked a room.")
-        # return True
-
     else:
         print("[SERVER] Term is colliding.")
         return False
-    # customer_id = ObjectId(customer_id)
-    # room_id = ObjectId(room_id)
-    #
-    # if can_be_booked(room_id, check_in, check_out):
-    #     customer_booking = {
-    #         "booking_id": ObjectId(),
-    #         "room_id": room_id,
-    #         "date_from": check_in,
-    #         "date_to": check_out
-    #     }
-    #
-    #     room_booking = {
-    #         "booking_id": ObjectId(),
-    #         "customer_id": customer_id,
-    #         "date_from": check_in,
-    #         "date_to": check_out
-    #     }
-    #
-    #     room_update = mongo.rooms.update_one({"_id": room_id}, {"$push": {"bookings": room_booking}})
-    #     if room_update.matched_count <= 0:
-    #         print("[SERVER] Failed to add booking to a room.")
-    #         return False
-    #
-    #     customer_update = mongo.customers.update_one({"_id": customer_id}, {"$push": {"bookings": customer_booking}})
-    #     if customer_update.matched_count <= 0:
-    #         print("[SERVER] Failed to add booking to a customer.")
-    #         return False
-    #     print("[SERVER] Term is OK.")
-    #     return True
-    # else:
-    #     print("[SERVER] Term is colliding.")
-    #     return False
 
 
-def change_booking(customer_id: str, old_room: str, new_room: str, booking_id: str, check_in: datetime, check_out: datetime):
-    # TODO: check if it works
+def change_booking(customer_id: str, new_room: str, booking_id: str, check_in: datetime, check_out: datetime):
+    # TODO: testing required
     if can_be_booked(ObjectId(new_room), check_in, check_out, ObjectId(booking_id)):
-        # removing old reservation
-        mongo.customers.update_one({"_id": ObjectId(customer_id)}, {
-            "$pull": {
-                "bookings": {"booking_id": ObjectId(booking_id)}
+        old_room = mongo.customers.aggregate(
+            [
+                {
+                    '$match': {
+                        '_id': ObjectId(customer_id)
+                    }
+                }, {
+                    '$project': {
+                        '_id': 0,
+                        'bookings': 1
+                    }
+                },
+                {
+                    '$unwind': '$bookings'
+                }, {
+                    '$match': {
+                        'bookings.booking_id': ObjectId(booking_id)
+                    }
+                }, {
+                    '$project': {
+                        'old_room': '$bookings.room_id'
+                    }
+                }
+            ]
+        )
+
+        old_room = list(old_room)[0].get('old_room')
+        # update w customers
+        mongo.customers.update_one(
+            {
+                "_id": ObjectId(customer_id),
+                "bookings.booking_id": ObjectId(booking_id)
+            },
+            {
+                "$set": {
+                    "bookings.$.room_id": ObjectId(new_room),
+                    "bookings.$.date_from": check_in,
+                    "bookings.$.date_to": check_out
+                }
             }
-        })
-        mongo.rooms.update_one({"_id": ObjectId(old_room)}, {
+        )
+
+        # wywalenie i dodanie w Rooms
+        mongo.rooms.update_one({"_id": old_room}, {
             "$pull": {
                 "bookings": {"booking_id": ObjectId(booking_id)}
             }
         })
 
-        # adding new reservation
-        return push_bookings(ObjectId(booking_id), ObjectId(customer_id), ObjectId(new_room), check_in, check_out)
-
+        booking_in_rooms = {
+            "booking_id": ObjectId(booking_id),
+            "customer_id": ObjectId(customer_id),
+            "date_from": check_in,
+            "date_to": check_out
+        }
+        room_update = mongo.rooms.update_one({"_id": ObjectId(new_room)}, {
+            "$push": {
+                "bookings": booking_in_rooms
+            }
+        })
+        if room_update.matched_count <= 0:
+            print("[SERVER] Failed to add booking to a room.")
+            return False
+        return True
     else:
         print("[SERVER] You cannot rebook this room.")
         return False
@@ -353,5 +345,45 @@ def list_all_bookings(customer_id: str):
     return bookings['bookings']
 
 
-def filter_rooms():
-    pass
+def filter_rooms(min_price: float = None, max_price: float = None,
+                 check_in: datetime = None, check_out: datetime = None,
+                 hotel_id: str = None, room_type: int = None):
+    # TODO: testing required
+    filters = {}
+    if min_price is not None:
+        filters.update(
+            {
+                "price_per_night": {"$gte": min_price}
+            }
+        )
+    if max_price is not None:
+        filters.update(
+            {
+                "price_per_night": {"$lte": max_price}
+            }
+        )
+    if check_in is not None:
+        filters.update(
+            {
+                "date_from": {"$gte": check_in}
+            }
+        )
+    if check_out is not None:
+        filters.update(
+            {
+                "date_to": {"$lte": check_out}
+            }
+        )
+    if hotel_id is not None:
+        filters.update(
+            {
+                "hotel_id": ObjectId(hotel_id)
+            }
+        )
+    if room_type is not None:
+        filters.update(
+            {
+                "room_type": room_type
+            }
+        )
+    return list(mongo.rooms.find(filters))
