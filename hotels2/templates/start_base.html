@@ -14,12 +14,17 @@
 </head>
 <body>
     <nav class="navbar">
+        {% if user.is_authenticated %}
         <div class="nav-elem"><a id="home" href="/">Home</a></div>
-        <div class="nav-elem"><a id="rooms" href="/">Rooms selection</a></div>
+        <div class="nav-elem"><a id="rooms" href="/reserve_rooms">Rooms selection</a></div>
         <div class="nav-elem"><a id="bookings" href="/bookings">My bookings</a></div>
+        <div class="nav-elem"><a id="logout" href="/logout">Logout</a></div>
+        {% else %}
+        <div class="nav-elem"><a id="home" href="/">Home</a></div>
+        <div class="nav-elem"><a id="rooms" href="/rooms">Rooms selection</a></div>
         <div class="nav-elem"><a id="login" href="/login">Login</a></div>
         <div class="nav-elem"><a id="signUp" href="/sign-up">Sign-Up</a></div>
-        <div class="nav-elem"><a id="logout" href="/logout">Logout</a></div>
+        {% endif %}
     </nav>
 
     {% with messages = get_flashed_messages(with_categories=true) %}

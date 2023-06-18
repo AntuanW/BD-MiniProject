@@ -1,8 +1,16 @@
 {% extends "start_base.html" %}
 {% block content %}
-    <main>
-        <h1>
-            Nasza zajebista strona startowa
-        </h1>
+    <main class="content-wrapper">
+        <h1>We work with following hotels:</h1>
+        <div class="hotels-wrapper" id="hotels">
+            {% for hotel in hotels %}
+            <div class="hotel-card">
+                <img src={{ hotel['imgUrl'] }}>
+                <h3 class="hotel-name">{{ hotel['name'] }}</h3>
+                <h3>{{ hotel['street'] }}</h3>
+                <h3>{{ hotel['city'] }}</h3>
+            </div>
+            {% endfor %}
+        </div>
     </main>
 {% endblock %}

@@ -34,6 +34,44 @@
 }
 
 
+/* Hotel cards */
+.content-wrapper{
+    align-items: center;
+    padding: .5em;
+}
+
+.content-wrapper h1{
+    text-align: center;
+    padding: .5em;
+}
+
+.hotels-wrapper{
+    display: flex;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+}
+
+.hotel-card{
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+    border-radius: 15px;
+}
+
+.hotel-card img{
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    width: 300px;
+}
+
+.hotel-name{
+    font-size: 1.5rem;
+}
+
+.hotel-card h3{
+    padding: 5px;
+    margin-left: 15px;
+}
+
+
 
 /* FOOTER */
 .footer-items{
