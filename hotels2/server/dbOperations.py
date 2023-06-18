@@ -1,4 +1,3 @@
-import pprint
 from hotels2.server.mongoConnection import *
 from hotels2.models.hotel import Hotel
 from hotels2.models.room import Room
@@ -38,6 +37,7 @@ def remove_hotel(hotel_id: str):
     except Exception as e:
         print("[SERVER]", e)
         return False
+
     res1 = mongo.hotels.delete_one({"_id": _id})
     res2 = mongo.rooms.delete_many({"hotel_id": _id})
     print("[SERVER] Removed:", res1.deleted_count, "hotels")
@@ -124,20 +124,6 @@ def set_availability(room_id: str, availability: bool):
 
 # ### Customers methods ###
 def add_customer(name: str, surname: str, mail: str, passwd: str):
-    # email_pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-    # result = re.match(email_pattern, mail)
-
-    # if result:
-    #     count = mongo.customers.count_documents({"email": mail})
-    #     if count > 0:
-    #         print("[SERVER] This email address is already taken.")
-    #         return False
-    #     new_customer = Customer(name, surname, mail, passwd)
-    #     mongo.customers.insert_one(vars(new_customer))
-    #     return True
-    # else:
-    #     print("[SERVER] Invalid email format, try - (string1)@(string2).(2+characters)")
-    #     return False
     count = mongo.customers.count_documents({"email": mail})
     if count > 0:
         print("[SERVER] This email address is already taken.")
@@ -148,6 +134,7 @@ def add_customer(name: str, surname: str, mail: str, passwd: str):
 
 
 def remove_customer(customer_id):
+    # TODO: check if customer doesnt have any bookings
     try:
         _id = ObjectId(customer_id)
     except Exception as e:
@@ -182,6 +169,7 @@ def set_password(customer_id, new_password):
 
 
 def can_be_booked(room_id: ObjectId, check_in: datetime, check_out: datetime, booking_id: ObjectId = None):
+    # TODO: objectid
     if check_in >= check_out:
         print("[SERVER] Check in date must be less than check out date.")
         return False
@@ -231,7 +219,6 @@ def can_be_booked(room_id: ObjectId, check_in: datetime, check_out: datetime, bo
 
 def push_bookings(booking_id: ObjectId, customer_id: ObjectId, room_id: ObjectId, check_in: datetime,
                   check_out: datetime):
-    # TODO: testing required
     booking_in_customers = {
         "booking_id": booking_id,
         "customer_id": room_id,
@@ -261,9 +248,16 @@ def push_bookings(booking_id: ObjectId, customer_id: ObjectId, room_id: ObjectId
 
 def add_new_booking(customer_id: str, room_id: str, check_in: datetime, check_out: datetime):
     # TODO: testing required
-    if can_be_booked(ObjectId(room_id), check_in, check_out):
+    try:
+        customer_id = ObjectId(customer_id)
+        room_id = ObjectId(room_id)
+    except Exception as e:
+        print("[SERVER]", e)
+        return False
+
+    if can_be_booked(room_id, check_in, check_out):
         booking_id = ObjectId()
-        return push_bookings(booking_id, ObjectId(customer_id), ObjectId(room_id), check_in, check_out)
+        return push_bookings(booking_id, customer_id, room_id, check_in, check_out)
     else:
         print("[SERVER] Term is colliding.")
         return False
@@ -272,34 +266,35 @@ def add_new_booking(customer_id: str, room_id: str, check_in: datetime, check_ou
 def change_booking(customer_id: str, new_room: str, booking_id: str, check_in: datetime, check_out: datetime):
     # TODO: testing required
     if can_be_booked(ObjectId(new_room), check_in, check_out, ObjectId(booking_id)):
-        old_room = mongo.customers.aggregate(
-            [
-                {
-                    '$match': {
-                        '_id': ObjectId(customer_id)
-                    }
-                }, {
+        old_room = mongo.customers.aggregate([
+            {
+                '$match': {
+                    '_id': ObjectId(customer_id)
+                }
+            },
+            {
                 '$project': {
                     '_id': 0,
                     'bookings': 1
                 }
             },
-                {
-                    '$unwind': '$bookings'
-                }, {
+            {
+                '$unwind': '$bookings'
+            },
+            {
                 '$match': {
                     'bookings.booking_id': ObjectId(booking_id)
                 }
-            }, {
+            },
+            {
                 '$project': {
                     'old_room': '$bookings.room_id'
                 }
             }
-            ]
-        )
+        ])
 
         old_room = list(old_room)[0].get('old_room')
-        # update w customers
+        # update in customers
         mongo.customers.update_one(
             {
                 "_id": ObjectId(customer_id),
@@ -314,7 +309,7 @@ def change_booking(customer_id: str, new_room: str, booking_id: str, check_in: d
             }
         )
 
-        # wywalenie i dodanie w Rooms
+        # remove and update Rooms
         mongo.rooms.update_one({"_id": old_room}, {
             "$pull": {
                 "bookings": {"booking_id": ObjectId(booking_id)}
@@ -341,20 +336,10 @@ def change_booking(customer_id: str, new_room: str, booking_id: str, check_in: d
         return False
 
 
-def list_all_bookings(customer_id: str):
-    try:
-        _id = ObjectId(customer_id)
-    except Exception as e:
-        print("[SERVER]", e)
-        return False
-
-    bookings = mongo.customers.find_one({"_id": _id})
-    return bookings['bookings']
-
-
 def filter_rooms(min_price: float = None, max_price: float = None,
                  check_in: datetime = None, check_out: datetime = None,
                  hotel_id: str = None, room_type: int = None):
+
     query: list = [
         {  # 0
             '$match': {
@@ -444,7 +429,12 @@ def filter_rooms(min_price: float = None, max_price: float = None,
     if check_out is not None:
         query[4]['$match']['$or'][1]['bookings.date_from']['$gte'] = check_out
     if hotel_id is not None:
-        query[0]['$match']['hotel_id'] = ObjectId(hotel_id)
+        try:
+            _id = ObjectId(hotel_id)
+        except Exception as e:
+            print("[SERVER]", e)
+            return False
+        query[0]['$match']['hotel_id'] = _id
     if room_type is not None:
         query[0]['$match']['room_type'] = room_type
 
@@ -453,10 +443,16 @@ def filter_rooms(min_price: float = None, max_price: float = None,
 
 
 def get_all_user_bookings(user_id: str):
+    try:
+        _id = ObjectId(user_id)
+    except Exception as e:
+        print("[SERVER]", e)
+        return False
+
     query = [
         {
             '$match': {
-                '_id': ObjectId(user_id)
+                '_id': _id
             }
         },
         {
