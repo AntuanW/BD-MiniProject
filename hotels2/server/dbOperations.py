@@ -198,14 +198,53 @@ def can_be_booked(room_id: ObjectId, check_in: datetime, check_out: datetime, bo
         '$match': {
             '$or': [
                 {
-                    'bookings.date_from': {
-                        '$gte': check_out
-                    }
-                },
-                {
-                    'bookings.date_to': {
-                        '$lte': check_in
-                    }
+                    '$and': [
+                        {
+                            'bookings.date_from': {
+                                '$gte': check_in
+                            }
+                        }, {
+                            'bookings.date_from': {
+                                '$lt': check_out
+                            }
+                        }
+                    ]
+                }, {
+                    '$and': [
+                        {
+                            'bookings.date_from': {
+                                '$gte': check_in
+                            }
+                        }, {
+                            'bookings.date_to': {
+                                '$lte': check_out
+                            }
+                        }
+                    ]
+                }, {
+                    '$and': [
+                        {
+                            'bookings.date_from': {
+                                '$lte': check_in
+                            }
+                        }, {
+                            'bookings.date_to': {
+                                '$gte': check_out
+                            }
+                        }
+                    ]
+                }, {
+                    '$and': [
+                        {
+                            'bookings.date_to': {
+                                '$gt': check_in
+                            }
+                        }, {
+                            'bookings.date_to': {
+                                '$lte': check_out
+                            }
+                        }
+                    ]
                 }
             ]
         }
