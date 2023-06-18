@@ -279,22 +279,22 @@ def change_booking(customer_id: str, new_room: str, booking_id: str, check_in: d
                         '_id': ObjectId(customer_id)
                     }
                 }, {
-                    '$project': {
-                        '_id': 0,
-                        'bookings': 1
-                    }
-                },
+                '$project': {
+                    '_id': 0,
+                    'bookings': 1
+                }
+            },
                 {
                     '$unwind': '$bookings'
                 }, {
-                    '$match': {
-                        'bookings.booking_id': ObjectId(booking_id)
-                    }
-                }, {
-                    '$project': {
-                        'old_room': '$bookings.room_id'
-                    }
+                '$match': {
+                    'bookings.booking_id': ObjectId(booking_id)
                 }
+            }, {
+                '$project': {
+                    'old_room': '$bookings.room_id'
+                }
+            }
             ]
         )
 
@@ -355,42 +355,98 @@ def list_all_bookings(customer_id: str):
 def filter_rooms(min_price: float = None, max_price: float = None,
                  check_in: datetime = None, check_out: datetime = None,
                  hotel_id: str = None, room_type: int = None):
-    # TODO: testing required
-    filters = {}
+    query: list = [
+        {  # 0
+            '$match': {
+                'hotel_id': {
+                    '$nin': []
+                },
+                'price_per_night': {
+                    '$gte': 0,
+                    '$lte': float('inf')
+                },
+                'room_type': {
+                    '$exists': 1
+                },
+                'is_available': True
+            }
+        },
+        {  # 1
+            '$unwind': {
+                'path': '$bookings',
+                'preserveNullAndEmptyArrays': True
+            }
+        },
+        {  # 2
+            '$lookup': {
+                'from': 'Hotels',
+                'localField': 'hotel_id',
+                'foreignField': '_id',
+                'as': 'hotel_info'
+            }
+        },
+        {  # 3
+            '$unwind': '$hotel_info'
+        },
+        {  # 4
+            '$match': {
+                '$or': [
+                    {
+                        'bookings': {
+                            '$exists': 0
+                        }
+                    },
+                    {
+                        'bookings.date_from': {
+                            '$gte': datetime(2223, 7, 18)
+                        }
+                    },
+                    {
+                        'bookings.date_to': {
+                            '$lte': datetime(2223, 7, 1)
+                        }
+                    }
+                ]
+            }
+        },
+        {  # 5
+            '$group': {
+                '_id': {
+                    '_id': '$_id',
+                    'hotel_id': '$hotel_id',
+                    'room_type': '$room_type',
+                    'price_per_night': '$price_per_night',
+                    'is_available': '$is_available',
+                    'room_number': '$room_number',
+                    'hotel_info': '$hotel_info'
+                }
+            }
+        },
+        {  # 6
+            '$project': {
+                '_id': '$_id._id',
+                'hotel_id': '$_id.hotel_id',
+                'room_type': '$_id.room_type',
+                'price_per_night': '$_id.price_per_night',
+                'is_available': '$_id.is_available',
+                'room_number': '$_id.room_number',
+                'hotel_info': '$_id.hotel_info'
+            }
+        }
+    ]
+
     if min_price is not None:
-        filters.update(
-            {
-                "price_per_night": {"$gte": min_price}
-            }
-        )
+        query[0]['$match']['price_per_night']['$gte'] = min_price
     if max_price is not None:
-        filters.update(
-            {
-                "price_per_night": {"$lte": max_price}
-            }
-        )
+        query[0]['$match']['price_per_night']['$gte'] = max_price
     if check_in is not None:
-        filters.update(
-            {
-                "date_from": {"$gte": check_in}
-            }
-        )
+        query[4]['$match']['$or'][2]['bookings.date_to']['$lte'] = check_in
     if check_out is not None:
-        filters.update(
-            {
-                "date_to": {"$lte": check_out}
-            }
-        )
+        query[4]['$match']['$or'][1]['bookings.date_from']['$gte'] = check_out
     if hotel_id is not None:
-        filters.update(
-            {
-                "hotel_id": ObjectId(hotel_id)
-            }
-        )
+        query[0]['$match']['hotel_id'] = ObjectId(hotel_id)
     if room_type is not None:
-        filters.update(
-            {
-                "room_type": room_type
-            }
-        )
-    return list(mongo.rooms.find(filters))
+        query[0]['$match']['room_type'] = room_type
+
+    res = list(mongo.rooms.aggregate(query))
+    return res
