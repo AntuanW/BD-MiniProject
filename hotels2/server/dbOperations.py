@@ -134,7 +134,6 @@ def add_customer(name: str, surname: str, mail: str, passwd: str):
 
 
 def remove_customer(customer_id):
-    # TODO: check if customer doesnt have any bookings
     try:
         _id = ObjectId(customer_id)
     except Exception as e:
@@ -169,7 +168,6 @@ def set_password(customer_id, new_password):
 
 
 def can_be_booked(room_id: ObjectId, check_in: datetime, check_out: datetime, booking_id: ObjectId = None):
-    # TODO: objectid
     if check_in >= check_out:
         print("[SERVER] Check in date must be less than check out date.")
         return False
@@ -198,7 +196,7 @@ def can_be_booked(room_id: ObjectId, check_in: datetime, check_out: datetime, bo
         })
     query.append({
         '$match': {
-            '$nor': [
+            '$or': [
                 {
                     'bookings.date_from': {
                         '$gte': check_out
@@ -221,13 +219,13 @@ def push_bookings(booking_id: ObjectId, customer_id: ObjectId, room_id: ObjectId
                   check_out: datetime):
     booking_in_customers = {
         "booking_id": booking_id,
-        "customer_id": room_id,
+        "room_id": room_id,
         "date_from": check_in,
         "date_to": check_out
     }
     booking_in_rooms = {
         "booking_id": booking_id,
-        "room_id": room_id,
+        "customer_id": customer_id,
         "date_from": check_in,
         "date_to": check_out
     }
@@ -247,7 +245,6 @@ def push_bookings(booking_id: ObjectId, customer_id: ObjectId, room_id: ObjectId
 
 
 def add_new_booking(customer_id: str, room_id: str, check_in: datetime, check_out: datetime):
-    # TODO: testing required
     try:
         customer_id = ObjectId(customer_id)
         room_id = ObjectId(room_id)
@@ -264,7 +261,6 @@ def add_new_booking(customer_id: str, room_id: str, check_in: datetime, check_ou
 
 
 def change_booking(customer_id: str, new_room: str, booking_id: str, check_in: datetime, check_out: datetime):
-    # TODO: testing required
     if can_be_booked(ObjectId(new_room), check_in, check_out, ObjectId(booking_id)):
         old_room = mongo.customers.aggregate([
             {
