@@ -2,6 +2,53 @@
 
 {% block content %}
     <main class="content-wrapper">
-        <h1>Zajebiste pokoje po zalogowaniu</h1>
+        <h1>Available rooms:</h1>
+        <div class="rooms-wrapper">
+            {% for room in rooms %}
+            <div class="room-card">
+                <img src={{ room['imgUrl'] }}>
+                <h3 class="hotel-name">Nazwa hotelu</h3>
+                <h3>People in room: {{ room['room_type'] }}</h3>
+                <h3>Price per night: {{ room['price_per_night'] }} zł</h3>
+                <form method="POST" class="date-form">
+                    <div class="form-group">
+                        <label for="checkin">Check in date:</label>
+                        <input type="date" id="checkin" name="checkin" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="checkout">Check out date:</label>
+                        <input type="date" id="checkout" name="checkout" required>
+                    </div>
+                    <input type="hidden" name="room_id" value={{ room['_id'] }}>
+                    <input type="hidden" name="customer_id" value={{ current_user._id }}>
+                    <div class="btn-wrap">
+                        <button type="submit" class="reserve-btn">Book</button>
+                    </div>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+
+        <form class="rooms-filter" method="POST">
+            <h2>Choose your filters:</h2>
+            <div class="form-group">
+
+            </div>
+            <div class="form-group">
+
+            </div>
+            <div class="form-group">
+
+            </div>
+            <div class="form-group">
+
+            </div>
+            <div class="form-group">
+
+            </div>
+            <div class="form-group">
+
+            </div>
+        </form>
     </main>
 {% endblock %}
