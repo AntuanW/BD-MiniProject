@@ -19,12 +19,12 @@ def add_validators():
 
 
 # ### Hotels methods ###
-def add_hotel(name: str, street: str, city: str, zip_code: str):
+def add_hotel(name: str, street: str, city: str, zip_code: str, img: str):
     zip_regex = r"^\d{5}$"
     result = re.match(zip_regex, zip_code)
 
     if result:
-        new_hotel = Hotel(name, street, city, zip_code)
+        new_hotel = Hotel(name, street, city, zip_code, img)
         mongo.hotels.insert_one(vars(new_hotel))
         return True
     else:
@@ -54,7 +54,7 @@ def get_all_hotels():
 
 
 # ### Rooms methods ###
-def add_room(hotel_id: str, room_type: int, room_number: int, ppn, availability: bool = True):
+def add_room(hotel_id: str, room_type: int, room_number: int, ppn, img: str, availability: bool = True):
     try:
         _id = ObjectId(hotel_id)
     except Exception as e:
@@ -66,7 +66,7 @@ def add_room(hotel_id: str, room_type: int, room_number: int, ppn, availability:
         print("[SERVER] Room number", room_number, "already exists.")
         return False
     else:
-        new_room = Room(_id, room_type, room_number, float(ppn), availability)
+        new_room = Room(_id, room_type, room_number, float(ppn), availability, img)
         mongo.rooms.insert_one(vars(new_room))
         return True
 

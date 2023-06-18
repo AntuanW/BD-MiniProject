@@ -3,7 +3,7 @@
 hotel_validator = {
     "$jsonSchema": {
         "bsonType": "object",
-        "required": ["name", "street", "city", "zip_code"],
+        "required": ["name", "street", "city", "zip_code", "imgUrl"],
         "properties": {
             "name": {
                 "bsonType": "string"
@@ -17,6 +17,9 @@ hotel_validator = {
             "zip_code": {
                 "bsonType": "string",
                 "description": "string consisting of 5 digit without any separators"
+            },
+            "imgUrl": {
+                "bsonType": "string"
             }
         }
     }
@@ -25,7 +28,7 @@ hotel_validator = {
 room_validator = {
     "$jsonSchema": {
         "bsonType": "object",
-        "required": ["hotel_id", "room_type", "room_number", "price_per_night", "is_available"],
+        "required": ["hotel_id", "room_type", "room_number", "price_per_night", "is_available, imgUrl"],
         "properties": {
             "hotel_id": {
                 "bsonType": "objectId"
@@ -43,6 +46,9 @@ room_validator = {
             },
             "is_available": {
                 "bsonType": "bool"
+            },
+            "imgUrl": {
+                "bsonType": "string"
             },
             "bookings": {
                 "bsonType": "array",
