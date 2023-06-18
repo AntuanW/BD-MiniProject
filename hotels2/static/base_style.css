@@ -45,6 +45,11 @@
     padding: .5em;
 }
 
+.content-wrapper p{
+    text-align: center;
+    margin-bottom: 2em;
+}
+
 .hotels-wrapper,
 .rooms-wrapper{
     display: flex;
@@ -64,7 +69,7 @@
 .room-card img{
     border-top-left-radius: 15px;
     border-top-right-radius: 15px;
-    width: 300px;
+    max-width: 500px;
 }
 
 .hotel-name{
@@ -87,6 +92,8 @@
 
 .btn-wrap{
     text-align: center;
+    display: flex;
+    justify-content: space-evenly;
 }
 
 .reserve-btn{
@@ -101,6 +108,20 @@
 
 .reserve-btn:hover{
     background: #003b0c;
+}
+
+.remove-booking{
+    margin: .7em;
+    cursor: pointer;
+    padding: .5em;
+    border: none;
+    border-radius: 10px;
+    color: white;
+    background: #ae0c00;
+}
+
+.remove-booking:hover{
+    background: #5d0b00;
 }
 
 /* FOOTER */
@@ -118,4 +139,22 @@
     color: white;
     line-height: 3rem;
     font-size: 1.2rem;
+}
+
+
+/*rebooking*/
+.change-title{
+    text-align: center;
+    margin: .9em;
+}
+
+.rebooking{
+    max-width: 350px;
+    margin: 0 auto;
+}
+
+.approve-change{
+    width: 200px;
+    text-align: center;
+    margin: 0 auto;
 }
