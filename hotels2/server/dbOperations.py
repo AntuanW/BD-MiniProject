@@ -508,6 +508,22 @@ def get_all_user_bookings(user_id: str):
                 'hotel_zip_code': '$hotel_info.zip_code',
                 'hotel_imgUrl': '$hotel_info.imgUrl'
             }
-        }]
+        },
+        {
+            '$addFields': {
+                'can_be_edited': {
+                    '$cond': {
+                        'if': {
+                            '$gt': [
+                                '$date_from', datetime.utcnow()
+                            ]
+                        },
+                        'then': True,
+                        'else': False
+                    }
+                }
+            }
+        }
+    ]
     res = list(mongo.customers.aggregate(query))
     return res
