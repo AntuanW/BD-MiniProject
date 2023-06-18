@@ -450,3 +450,68 @@ def filter_rooms(min_price: float = None, max_price: float = None,
 
     res = list(mongo.rooms.aggregate(query))
     return res
+
+
+def get_all_user_bookings(user_id: str):
+    query = [
+        {
+            '$match': {
+                '_id': ObjectId(user_id)
+            }
+        },
+        {
+            '$unwind': '$bookings'
+        },
+        {
+            '$lookup': {
+                'from': 'Rooms',
+                'localField': 'bookings.room_id',
+                'foreignField': '_id',
+                'as': 'room_info'
+            }
+        },
+        {
+            '$unwind': '$room_info'
+        },
+        {
+            '$project': {
+                '_id': 0,
+                'name': 0,
+                'surname': 0,
+                'email': 0,
+                'password': 0,
+                'room_info.is_available': 0,
+                'room_info.bookings': 0
+            }
+        },
+        {
+            '$lookup': {
+                'from': 'Hotels',
+                'localField': 'room_info.hotel_id',
+                'foreignField': '_id',
+                'as': 'hotel_info'
+            }
+        },
+        {
+            '$unwind': '$hotel_info'
+        },
+        {
+            '$project': {
+                'room_id': '$bookings.room_id',
+                'booking_id': '$bookings.booking_id',
+                'date_from': '$bookings.date_from',
+                'date_to': '$bookings.date_to',
+                'hotel_id': '$room_info.hotel_id',
+                'room_type': '$room_info.room_type',
+                'room_number': '$room_info.room_number',
+                'price_per_night': '$room_info.price_per_night',
+                'room_imgUrl': '$room_info.imgUrl',
+                'hotel_name': '$hotel_info.name',
+                'hotel_address': '$hotel_info.street',
+                'hotel_city': '$hotel_info.city',
+                'hotel_zip_code': '$hotel_info.zip_code',
+                'hotel_imgUrl': '$hotel_info.imgUrl'
+            }
+        }]
+    res = list(mongo.customers.aggregate(query))
+    return res
