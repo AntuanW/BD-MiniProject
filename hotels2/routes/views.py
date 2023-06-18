@@ -14,7 +14,8 @@ def home():
 @views.route('/bookings')
 @login_required
 def logged_home():
-    return render_template("my_bookings.html", user=current_user)
+    user_bookings_info = mongo.customers.aggregate()
+    return render_template("my_bookings.html", user=current_user, bookings=user_bookings_info)
 
 
 @views.route('/rooms')
