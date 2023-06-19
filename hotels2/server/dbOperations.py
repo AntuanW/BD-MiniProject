@@ -370,7 +370,13 @@ def get_occupied_rooms(check_in: datetime, check_out: datetime):
 def filter_rooms(check_in: datetime = datetime(2400, 1, 1), check_out: datetime = datetime(2400, 1, 2), min_price: float = None, max_price: float = None,
                  room_type: int = None, hotel_city: str = None):
 
-    black_list = get_occupied_rooms(check_in, check_out)
+    if check_in is None:
+        check_in_fixed = datetime.now().date()
+        check_in_fixed = datetime.combine(check_in_fixed, datetime.min.time())
+    else:
+        check_in_fixed = check_in
+
+    black_list = get_occupied_rooms(check_in_fixed, check_out)
 
     query = [
         {
