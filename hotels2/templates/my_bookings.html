@@ -3,7 +3,10 @@
     <main class="content-wrapper">
         <h1>My bookings</h1>
         <p>You can manage your bookings here.</p>
-        <p>If you want to change room or hotel, you have to resign from your current booking and make a new one.</p>
+        <p>
+            If you want to change room or hotel, you have to book a new room that you want and then
+            resign from your previous booking.
+        </p>
         <p>If you want to change check in or check out date, click "Change booking" button.</p>
         <div class="rooms-wrapper" id="hotels">
             {% for booking in bookings %}
@@ -18,11 +21,11 @@
 
                 {% if booking['can_be_edited'] %}
                     <div class="btn-wrap">
-                        <button class="reserve-btn" onClick="fillAndShowTheForm('{{ booking['hotel_name'] }}', '{{ booking['date_from'] }}', '{{ booking['date_to'] }}', '{{ booking['booking_id'] }}', '{{ current_user._id }}')">
+                        <button class="reserve-btn" onClick="fillAndShowTheForm('{{ booking['hotel_name'] }}', '{{ booking['date_from'] }}', '{{ booking['date_to'] }}', '{{ booking['booking_id'] }}', '{{ current_user._id }}', '{{ booking['room_id'] }}')">
                             Change booking
                         </button>
                         <form method="POST">
-                            <button type="submit" class="remove-booking" onClick="removeBooking('{{ booking['booking_id'] }}')">Resign</button>
+                            <button type="submit" class="remove-booking" onClick="removeBooking('{{ booking['booking_id'] }}', '{{ booking['room_id'] }}')">Resign</button>
                         </form>
                     </div>
                 {% endif %}

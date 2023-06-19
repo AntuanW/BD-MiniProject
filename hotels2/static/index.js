@@ -1,4 +1,4 @@
-function fillAndShowTheForm(hotel, checkin, checkout, booking_id, customer_id){
+function fillAndShowTheForm(hotel, checkin, checkout, booking_id, customer_id, room_id){
     const form = document.querySelector('.rebooking');
 
     form.innerHTML = '';
@@ -21,9 +21,10 @@ function fillAndShowTheForm(hotel, checkin, checkout, booking_id, customer_id){
       <div class="form-group">
         <input type="hidden" id="booking_id" name="booking_id" value=${booking_id}>
         <input type="hidden" id="customer_id" name="customer_id" value=${customer_id}>
+        <input type="hidden" id="room_id" name="room_id" value=${room_id}>
       </div>
       <div class="form-group">
-        <button class="reserve-btn approve-change">Approve change</button>
+        <button type="submit" class="reserve-btn approve-change">Approve change</button>
       </div>      
     `;
 
@@ -31,10 +32,10 @@ function fillAndShowTheForm(hotel, checkin, checkout, booking_id, customer_id){
 }
 
 
-function removeBooking(booking_id) {
+function removeBooking(booking_id, room_id) {
     fetch('/remove-booking', {
         method: 'POST',
-        body: JSON.stringify({booking_id: booking_id})
+        body: JSON.stringify({booking_id: booking_id, room_id: room_id})
     }).then((_res) => {
         window.location.href = '/bookings'
     });
