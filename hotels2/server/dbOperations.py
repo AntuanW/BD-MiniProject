@@ -167,21 +167,16 @@ def set_password(customer_id, new_password):
     return True
 
 
-def can_be_booked(room_id: ObjectId, check_in: datetime, check_out: datetime, booking_id: ObjectId = None):
-    if check_in >= check_out:
-        print("[SERVER] Check in date must be less than check out date.")
-        return False
-
+def get_wrong_bookings(room_id: ObjectId, check_in: datetime, check_out: datetime, booking_id: ObjectId):
     query = [
         {
             '$match': {
-                '_id': ObjectId(room_id),
+                '_id': {'$exists': 1},
                 'is_available': True
             }
         },
         {
             '$project': {
-                '_id': 0,
                 'bookings': 1
             }
         },
@@ -189,6 +184,9 @@ def can_be_booked(room_id: ObjectId, check_in: datetime, check_out: datetime, bo
             '$unwind': '$bookings'
         }
     ]
+    if room_id is not None:
+        query[0]['$match']['_id'] = room_id
+
     if booking_id is not None:
         query.append({
             "$match": {
@@ -251,7 +249,16 @@ def can_be_booked(room_id: ObjectId, check_in: datetime, check_out: datetime, bo
         }
     })
 
-    bookings = list(mongo.rooms.aggregate(query))
+    return list(mongo.rooms.aggregate(query))
+
+
+def can_be_booked(room_id: ObjectId, check_in: datetime, check_out: datetime, booking_id: ObjectId = None):
+    if check_in >= check_out:
+        print("[SERVER] Check in date must be less than check out date.")
+        return False
+
+    bookings = get_wrong_bookings(room_id, check_in, check_out, booking_id)
+
     return len(bookings) == 0
 
 
@@ -352,96 +359,9 @@ def change_booking(customer_id: str, room_id: str, booking_id: str, check_in: da
 
 
 def get_occupied_rooms(check_in: datetime, check_out: datetime):
-    query = [
-        {
-            '$match': {
-                'is_available': True
-            }
-        },
-        {
-            '$project': {
-                'bookings': 1
-            }
-        },
-        {
-            '$unwind': '$bookings'
-        },
-        {
-            '$project': {
-                '_id': '$_id',
-                'date_from': '$bookings.date_from',
-                'date_to': '$bookings.date_to'
-            }
-        },
-        {
-            '$match': {
-                '$or': [
-                    {
-                        '$and': [
-                            {
-                                'date_from': {
-                                    '$gte': check_in
-                                }
-                            }, {
-                                'date_from': {
-                                    '$lte': check_out
-                                }
-                            }
-                        ]
-                    }, {
-                        '$and': [
-                            {
-                                'date_from': {
-                                    '$gte': check_in
-                                }
-                            }, {
-                                'date_to': {
-                                    '$lte': check_out
-                                }
-                            }
-                        ]
-                    }, {
-                        '$and': [
-                            {
-                                'date_from': {
-                                    '$lte': check_in
-                                }
-                            }, {
-                                'date_to': {
-                                    '$gte': check_out
-                                }
-                            }
-                        ]
-                    }, {
-                        '$and': [
-                            {
-                                'date_to': {
-                                    '$gt': check_in
-                                }
-                            }, {
-                                'date_to': {
-                                    '$lte': check_out
-                                }
-                            }
-                        ]
-                    }
-                ]
-            }
-        },
-        {
-            '$project': {'_id': 1}
-        },
-        {
-            '$group': {
-                '_id': '$_id'
-            }
-        }
-    ]
-    res = list(mongo.rooms.aggregate(query))
-    blacklist = []
-    for d in res:
-        blacklist.append(d['_id'])
-    return blacklist
+
+    booked_rooms = get_wrong_bookings(None, check_in, check_out, None)
+    return booked_rooms
 
 
 def filter_rooms(check_in: datetime, check_out: datetime, min_price: float = None, max_price: float = None,
@@ -494,30 +414,30 @@ def filter_rooms(check_in: datetime, check_out: datetime, min_price: float = Non
                 ]
             }
         },
-        {  # 5
-            '$group': {
-                '_id': {
-                    '_id': '$_id',
-                    'hotel_id': '$hotel_id',
-                    'room_type': '$room_type',
-                    'price_per_night': '$price_per_night',
-                    'is_available': '$is_available',
-                    'room_number': '$room_number',
-                    'hotel_info': '$hotel_info'
-                }
-            }
-        },
-        {  # 6
-            '$project': {
-                '_id': '$_id._id',
-                'hotel_id': '$_id.hotel_id',
-                'room_type': '$_id.room_type',
-                'price_per_night': '$_id.price_per_night',
-                'is_available': '$_id.is_available',
-                'room_number': '$_id.room_number',
-                'hotel_info': '$_id.hotel_info'
-            }
-        }
+        # {  # 5
+        #     '$group': {
+        #         '_id': {
+        #             '_id': '$_id',
+        #             'hotel_id': '$hotel_id',
+        #             'room_type': '$room_type',
+        #             'price_per_night': '$price_per_night',
+        #             'is_available': '$is_available',
+        #             'room_number': '$room_number',
+        #             'hotel_info': '$hotel_info'
+        #         }
+        #     }
+        # },
+        # {  # 6
+        #     '$project': {
+        #         '_id': '$_id._id',
+        #         'hotel_id': '$_id.hotel_id',
+        #         'room_type': '$_id.room_type',
+        #         'price_per_night': '$_id.price_per_night',
+        #         'is_available': '$_id.is_available',
+        #         'room_number': '$_id.room_number',
+        #         'hotel_info': '$_id.hotel_info'
+        #     }
+        # }
     ]
 
     if min_price is not None:
