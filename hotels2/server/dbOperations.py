@@ -352,15 +352,101 @@ def change_booking(customer_id: str, room_id: str, booking_id: str, check_in: da
 
 
 def get_occupied_rooms(check_in: datetime, check_out: datetime):
-    date_from, date_to = check_in, check_out
-    if check_in is None:
-        date_from = datetime()
-    pass
+    query = [
+        {
+            '$match': {
+                'is_available': True
+            }
+        },
+        {
+            '$project': {
+                'bookings': 1
+            }
+        },
+        {
+            '$unwind': '$bookings'
+        },
+        {
+            '$project': {
+                '_id': '$_id',
+                'date_from': '$bookings.date_from',
+                'date_to': '$bookings.date_to'
+            }
+        },
+        {
+            '$match': {
+                '$or': [
+                    {
+                        '$and': [
+                            {
+                                'date_from': {
+                                    '$gte': check_in
+                                }
+                            }, {
+                                'date_from': {
+                                    '$lte': check_out
+                                }
+                            }
+                        ]
+                    }, {
+                        '$and': [
+                            {
+                                'date_from': {
+                                    '$gte': check_in
+                                }
+                            }, {
+                                'date_to': {
+                                    '$lte': check_out
+                                }
+                            }
+                        ]
+                    }, {
+                        '$and': [
+                            {
+                                'date_from': {
+                                    '$lte': check_in
+                                }
+                            }, {
+                                'date_to': {
+                                    '$gte': check_out
+                                }
+                            }
+                        ]
+                    }, {
+                        '$and': [
+                            {
+                                'date_to': {
+                                    '$gt': check_in
+                                }
+                            }, {
+                                'date_to': {
+                                    '$lte': check_out
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            '$project': {'_id': 1}
+        },
+        {
+            '$group': {
+                '_id': '$_id'
+            }
+        }
+    ]
+    res = list(mongo.rooms.aggregate(query))
+    blacklist = []
+    for d in res:
+        blacklist.append(d['_id'])
+    return blacklist
 
 
 def filter_rooms(check_in: datetime, check_out: datetime, min_price: float = None, max_price: float = None,
                  hotel_id: str = None, room_type: int = None):
-    black_list = []
+    black_list = get_occupied_rooms(check_in, check_out)
     query: list = [
         {  # 0
             '$match': {
