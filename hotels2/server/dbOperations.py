@@ -363,104 +363,68 @@ def get_occupied_rooms(check_in: datetime, check_out: datetime):
     booked_rooms = get_wrong_bookings(None, check_in, check_out, None)
     res: set = set()
     for i in booked_rooms:
-        pprint.pprint(i)
         res.add(i['_id'])
     return list(res)
 
 
-def filter_rooms(check_in: datetime, check_out: datetime, min_price: float = None, max_price: float = None,
-                 room_type: int = None, hotel_id: str = None):
+def filter_rooms(check_in: datetime = datetime(2400, 1, 1), check_out: datetime = datetime(2400, 1, 2), min_price: float = None, max_price: float = None,
+                 room_type: int = None, hotel_city: str = None):
 
     black_list = get_occupied_rooms(check_in, check_out)
-    query: list = [
-        {  # 0
+
+    query = [
+        {
             '$match': {
-                'hotel_id': {
-                    '$nin': []
+                'is_available': True,
+                '_id': {
+                    '$nin': black_list
                 },
                 'price_per_night': {
-                    '$gte': 0,
-                    '$lte': float('inf')
+                    '$gte': 0.0,
+                    '$lt': 100000000.0
                 },
-                'room_type': {
-                    '$exists': 1
-                },
-                'is_available': True
+                'room_type': {'$exists': 1}
             }
-        },
-        {  # 1
-            '$unwind': {
-                'path': '$bookings',
-                'preserveNullAndEmptyArrays': True
-            }
-        },
-        {  # 2
+        }, {
             '$lookup': {
                 'from': 'Hotels',
                 'localField': 'hotel_id',
                 'foreignField': '_id',
                 'as': 'hotel_info'
             }
-        },
-        {  # 3
+        }, {
             '$unwind': '$hotel_info'
-        },
-        {  # 4
-            '$match': {
-                '$or': [
-                    {
-                        'bookings': {
-                            '$exists': 0
-                        }
-                    },
-                    {
-                        '_id': {'$nin': black_list}
-                    }
-                ]
+        }, {
+            '$project': {
+                '_id': 0,
+                'room_id': '$_id',
+                'room_type': 1,
+                'price_per_night': 1,
+                'room_imgUrl': '$imgUrl',
+                'hotel_name': '$hotel_info.name',
+                'hotel_street': '$hotel_info.street',
+                'hotel_city': 'hotel_info.city'
             }
-        },
-        # {  # 5
-        #     '$group': {
-        #         '_id': {
-        #             '_id': '$_id',
-        #             'hotel_id': '$hotel_id',
-        #             'room_type': '$room_type',
-        #             'price_per_night': '$price_per_night',
-        #             'is_available': '$is_available',
-        #             'room_number': '$room_number',
-        #             'hotel_info': '$hotel_info'
-        #         }
-        #     }
-        # },
-        # {  # 6
-        #     '$project': {
-        #         '_id': '$_id._id',
-        #         'hotel_id': '$_id.hotel_id',
-        #         'room_type': '$_id.room_type',
-        #         'price_per_night': '$_id.price_per_night',
-        #         'is_available': '$_id.is_available',
-        #         'room_number': '$_id.room_number',
-        #         'hotel_info': '$_id.hotel_info'
-        #     }
-        # }
+        }, {
+            '$match': {
+                'hotel_city': {
+                    '$exists': 1
+                }
+            }
+        }
     ]
 
     if min_price is not None:
         query[0]['$match']['price_per_night']['$gte'] = min_price
     if max_price is not None:
-        query[0]['$match']['price_per_night']['$gte'] = max_price
-    if hotel_id is not None:
-        try:
-            _id = ObjectId(hotel_id)
-        except Exception as e:
-            print("[SERVER]", e)
-            return False
-        query[0]['$match']['hotel_id'] = _id
+        query[0]['$match']['price_per_night']['$lt'] = max_price
     if room_type is not None:
         query[0]['$match']['room_type'] = room_type
+    if hotel_city is not None:
+        query[4]['$match']['hotel_city'] = hotel_city
 
-    res = list(mongo.rooms.aggregate(query))
-    return res
+    result = mongo.rooms.aggregate(query)
+    return list(result)
 
 
 def get_all_user_bookings(user_id: str):
