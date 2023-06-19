@@ -28,7 +28,7 @@ hotel_validator = {
 room_validator = {
     "$jsonSchema": {
         "bsonType": "object",
-        "required": ["hotel_id", "room_type", "room_number", "price_per_night", "is_available, imgUrl"],
+        "required": ["hotel_id", "room_type", "room_number", "price_per_night", "is_available", "imgUrl"],
         "properties": {
             "hotel_id": {
                 "bsonType": "objectId"

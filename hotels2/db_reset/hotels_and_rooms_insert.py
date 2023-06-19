@@ -65,5 +65,7 @@ room_data = [
         vars(Room(hotel_ids[2], 3, 9, 300.0, True, "https://gladstonehouse.agencydominion.net/uploads/2021/09/Gladstone_House_Guestroom-NoArt-King-1440x700.jpg")),
         vars(Room(hotel_ids[2], 4, 10, 460.0, True, "https://imageio.forbes.com/specials-images/imageserve/5cdb058a5218470008b0b00f/Nobu-Ryokan-Malibu/0x0.jpg?format=jpg&height=1009&width=2000")),
 ]
-pprint.pprint()
+
+# pprint.pprint(room_data)
+
 room_check = mongo.rooms.insert_many(room_data)

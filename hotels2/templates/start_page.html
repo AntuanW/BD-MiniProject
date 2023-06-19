@@ -6,9 +6,9 @@
             {% for hotel in hotels %}
             <div class="hotel-card">
                 <img src={{ hotel['imgUrl'] }}>
-                <h3 class="hotel-name">{{ hotel['name'] }}</h3>
-                <h3>{{ hotel['street'] }}</h3>
-                <h3>{{ hotel['city'] }}</h3>
+                <h3 class="hotel-name">Name: {{ hotel['name'] }}</h3>
+                <h3>Street: {{ hotel['street'] }}</h3>
+                <h3>City: {{ hotel['city'] }}</h3>
             </div>
             {% endfor %}
         </div>

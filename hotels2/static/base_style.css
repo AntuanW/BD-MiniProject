@@ -181,3 +181,12 @@
 .filter-btn:hover{
     background: #9c5d00;
 }
+
+.form-group label{
+    padding-left: 5px;
+    margin-left: 15px;
+}
+
+.form-group input{
+    margin: 0 15px;
+}
