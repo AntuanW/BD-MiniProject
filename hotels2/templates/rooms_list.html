@@ -44,9 +44,6 @@
             {% for room in rooms %}
             <div class="room-card">
                 <img src={{ room['imgUrl'] }}>
-                <h3 class="hotel-name">{{ room['hotel_info']['name'] }}</h3>
-                <h3>City: {{ room['hotel_info']['city'] }}</h3>
-                <h3>Street: {{ room['hotel_info']['street'] }}</h3>
                 <h3>People in room: {{ room['room_type'] }}</h3>
                 <h3>Price per night: {{ room['price_per_night'] }} zł</h3>
             </div>
