@@ -145,28 +145,6 @@ def remove_customer(customer_id):
     return True
 
 
-def set_password(customer_id, new_password):
-    try:
-        _id = ObjectId(customer_id)
-    except Exception as e:
-        print("[SERVER]", e)
-        return False
-
-    old_password = mongo.customers.find_one({"_id": _id})
-    if old_password.get("password") == new_password:
-        print("[SERVER] New password cannot be the same as the old one.")
-        return False
-
-    password_update = {
-        "$set": {"password": new_password}
-    }
-    update = mongo.customers.update_one({"_id": _id}, password_update)
-    if update.matched_count <= 0:
-        print("[SERVER] Failed to set new password. There is no customer with such id in the database.")
-        return False
-    return True
-
-
 def get_wrong_bookings(room_id: ObjectId, check_in: datetime, check_out: datetime, booking_id: ObjectId):
     query = [
         {
