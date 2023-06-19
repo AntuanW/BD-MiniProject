@@ -353,7 +353,6 @@ def change_booking(customer_id: str, room_id: str, booking_id: str, check_in: da
 def filter_rooms(min_price: float = None, max_price: float = None,
                  check_in: datetime = None, check_out: datetime = None,
                  hotel_id: str = None, room_type: int = None):
-
     query: list = [
         {  # 0
             '$match': {
@@ -541,3 +540,47 @@ def get_all_user_bookings(user_id: str):
     ]
     res = list(mongo.customers.aggregate(query))
     return res
+
+
+def remove_booking(booking_id: str, customer_id: str, room_id: str):
+
+    try:
+        customer_id = ObjectId(customer_id)
+        booking_id = ObjectId(booking_id)
+        room_id = ObjectId(room_id)
+    except Exception as e:
+        print("[SERVER]", e)
+        return False
+
+    removed_from_rooms = mongo.rooms.update_one(
+        {
+            '_id': room_id,
+        },
+        {
+            '$pull': {
+                'bookings': {'booking_id': booking_id}
+            }
+        },
+        False,
+        True
+    )
+    if removed_from_rooms.modified_count <= 0:
+        print("[SERVER] Error during room update")
+        return False
+
+    removed_from_customers = mongo.customers.update_one(
+        {
+            '_id': customer_id
+        },
+        {
+            '$pull': {
+                'bookings': {'booking_id': booking_id}
+            }
+        },
+        False,
+        True
+    )
+    if removed_from_customers.modified_count <= 0:
+        print("[SERVER] Error during customer update")
+        return False
+    return True
