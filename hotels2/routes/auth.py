@@ -1,9 +1,12 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for
-from hotels2.server.dbOperations import *
-from hotels2.models.logged_user import LoggedUser
-from werkzeug.security import generate_password_hash, check_password_hash
 import re
+
+from flask import Blueprint, render_template, request, flash, redirect, url_for
 from flask_login import login_user, login_required, logout_user, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
+
+from hotels2.models.logged_user import LoggedUser
+from hotels2.server.dbOperations import *
+
 auth = Blueprint('auth', __name__)
 
 

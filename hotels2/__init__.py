@@ -1,7 +1,8 @@
 from flask import Flask
 from flask_login import LoginManager
-from hotels2.server.dbOperations import *
+
 from hotels2.models.logged_user import LoggedUser
+from hotels2.server.dbOperations import *
 
 
 def create_app():

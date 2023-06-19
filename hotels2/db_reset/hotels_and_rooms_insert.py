@@ -1,5 +1,4 @@
 from hotels2.server.dbOperations import *
-import pprint
 
 mongo.rooms.delete_many({})
 mongo.logs.delete_many({})

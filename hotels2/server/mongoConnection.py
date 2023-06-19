@@ -1,9 +1,8 @@
-import certifi
 import os
-from pymongo import *
-from pymongo.database import *
+
+import certifi
 from dotenv import load_dotenv
-import pprint
+from pymongo.database import *
 
 load_dotenv()
 
