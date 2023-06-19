@@ -1,13 +1,11 @@
-import re
-from datetime import datetime
-
-from bson.objectid import ObjectId
-
-from hotels2.models.customer import Customer
+from hotels2.server.mongoConnection import *
 from hotels2.models.hotel import Hotel
 from hotels2.models.room import Room
+from hotels2.models.customer import Customer
+from datetime import datetime
+from bson.objectid import ObjectId
 from hotels2.models.validators import *
-from hotels2.server.mongoConnection import *
+import re
 
 mongo = MongoConnection()
 

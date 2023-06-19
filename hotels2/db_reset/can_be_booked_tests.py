@@ -1,8 +1,7 @@
-from datetime import datetime
-
 from bson.objectid import ObjectId
-
+from datetime import datetime
 from hotels2.server.dbOperations import can_be_booked
+
 
 if __name__ == '__main__':
     customer_id = ObjectId('648b44e51905fb3623930785')
