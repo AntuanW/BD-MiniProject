@@ -13,7 +13,7 @@ def login():
         email = request.form.get('email')
         password = request.form.get('password')
 
-        user = mongo.customers.find_one({"email": email})
+        user = get_user_email(email)
         if user is None:
             flash('There is no user with this email address.', category='error')
         elif check_password_hash(user['password'], password):
@@ -38,12 +38,12 @@ def sign_up():
     if request.method == 'POST':
         name = request.form.get('firstName')
         surname = request.form.get('surname')
-        mail = request.form.get('email')
+        email = request.form.get('email')
         password1 = request.form.get('password1')
         password2 = request.form.get('password2')
 
         email_pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-        result = re.match(email_pattern, mail)
+        result = re.match(email_pattern, email)
         if not result:
             flash('Wrong email format!', category='error')
         elif len(name) == 0:
@@ -55,10 +55,10 @@ def sign_up():
         elif password1 != password2:
             flash('Passwords do not match!', category='error')
         else:
-            if add_customer(name, surname, mail, generate_password_hash(password1, method='sha256')):
+            if add_customer(name, surname, email, generate_password_hash(password1, method='sha256')):
                 flash('Account created successfully!', category='success')
-                user = mongo.customers.find_one({"email": mail})
-                user = LoggedUser(str(user['_id']), name, surname, mail, password1)
+                user = get_user_email(email)
+                user = LoggedUser(str(user['_id']), name, surname, email, password1)
                 login_user(user, remember=True)
                 return redirect(url_for('views.home'))
             else:

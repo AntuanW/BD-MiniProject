@@ -1,13 +1,6 @@
 from hotels2.server.dbOperations import *
 
 
-def clear_db():
-    mongo.rooms.delete_many({})
-    mongo.logs.delete_many({})
-    mongo.hotels.delete_many({})
-    mongo.customers.delete_many({})
-
-
 def reset_db():
     add_validators()
     hotel_ids = mongo.hotels.insert_many([

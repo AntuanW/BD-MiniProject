@@ -583,3 +583,6 @@ def get_all_cities():
     cities = mongo.hotels.aggregate(query)
     return list(cities)
 
+
+def get_user_email(email: str):
+    return mongo.customers.find_one({"email": email})
