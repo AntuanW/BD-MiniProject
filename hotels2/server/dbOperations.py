@@ -445,7 +445,7 @@ def get_occupied_rooms(check_in: datetime, check_out: datetime):
 
 
 def filter_rooms(check_in: datetime, check_out: datetime, min_price: float = None, max_price: float = None,
-                 hotel_id: str = None, room_type: int = None):
+                 room_type: int = None, hotel_id: str = None):
     black_list = get_occupied_rooms(check_in, check_out)
     query: list = [
         {  # 0

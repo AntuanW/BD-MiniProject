@@ -2,6 +2,43 @@
 
 {% block content %}
     <main class="content-wrapper">
+        <form class="rooms-filter" method="POST">
+            <h2>Choose your filters:</h2>
+                <div class="filter-wrap">
+                <div class="form-group">
+                    <label for="min_price">Min price</label>
+                    <input type="number" id="min_price" name="min_price" placeholder="50">
+                </div>
+                <div class="form-group">
+                    <label for="max_price">Max price</label>
+                    <input type="number" id="max_price" name="max_price" placeholder="20000">
+                </div>
+                <div class="form-group">
+                    <label for="checkin-filter">Check in</label>
+                    <input type="date" id="checkin-filter" name="checkin-filter" value={{ curr_date }}>
+                </div>
+                <div class="form-group">
+                    <label for="checkout-filter">Check out</label>
+                    <input type="date" id="checkout-filter" name="checkout-filter" value={{ max_date }}>
+                </div>
+                <div class="form-group">
+                    <label for="people">People in room</label>
+                    <input type="number" id="people" name="people">
+                </div>
+                <div class="form-group">
+                    <label for="city">City</label>
+                    <select id="city" name="city">
+                        <option value="select">Select a city</option>
+                        <option value="js">Javascript</option>
+                        <option value="php">PHP</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                    <button type="submit" class="filter-btn">Filter</button>
+            </div>
+        </form>
+
         <h1>Available rooms:</h1>
         <div class="rooms-wrapper">
             {% for room in rooms %}
@@ -28,27 +65,5 @@
             </div>
             {% endfor %}
         </div>
-
-        <form class="rooms-filter" method="POST">
-            <h2>Choose your filters:</h2>
-            <div class="form-group">
-
-            </div>
-            <div class="form-group">
-
-            </div>
-            <div class="form-group">
-
-            </div>
-            <div class="form-group">
-
-            </div>
-            <div class="form-group">
-
-            </div>
-            <div class="form-group">
-
-            </div>
-        </form>
     </main>
 {% endblock %}
