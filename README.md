@@ -73,7 +73,8 @@ Technologia:
 }
 ```
 
-# Metody i funcje operujące na poszczególnych kolekcjach - część z nich, nie jest wykorzystywana w aplikacji, ponieważ nie udało się zaimplementować, niektórych funkcjonalności, ale przydatne są przy zarządzaniu bazą danych:
+# Metody i funcje operujące na poszczególnych kolekcjach
+### Część z nich, nie jest wykorzystywana w aplikacji, ponieważ nie udało się zaimplementować, niektórych funkcjonalności, ale przydatne są przy zarządzaniu bazą danych
 
 - Hotels
   - get_all_hotels() - zwraca listę z danymi o hotelach
