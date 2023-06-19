@@ -403,7 +403,7 @@ def filter_rooms(check_in: datetime = datetime(2400, 1, 1), check_out: datetime 
                 'room_imgUrl': '$imgUrl',
                 'hotel_name': '$hotel_info.name',
                 'hotel_street': '$hotel_info.street',
-                'hotel_city': 'hotel_info.city'
+                'hotel_city': '$hotel_info.city'
             }
         }, {
             '$match': {
