@@ -47,20 +47,34 @@ def rooms_list():
     curr_date = datetime.now().date()
     curr_date = datetime.combine(curr_date, datetime.min.time())
     max_date = datetime(2123, 12, 12, 0, 0, 0)
-    rooms = filter_rooms(curr_date, max_date)
-    pprint.pprint(rooms)
-
-    if request.method == 'POST':
-        min_price = request.form.get('min_price')
-        max_price = request.form.get('max_price')
-        check_in = request.form.get('checkin-filter')
-        check_out = request.form.get('checkout-filter')
-        people = request.form.get('people')
-        city = request.form.get('city')
-
-        date_format = "%Y-%m-%d"
-        check_in = datetime.strptime(check_in, date_format)
-        check_out = datetime.strptime(check_out, date_format)
+    rooms = mongo.rooms.find()
+    # rooms = filter_rooms(curr_date, max_date)
+    # if request.method == 'POST':
+    #     min_price = request.form.get('min_price')
+    #     max_price = request.form.get('max_price')
+    #     check_in = request.form.get('checkin-filter')
+    #     check_out = request.form.get('checkout-filter')
+    #     people = request.form.get('people')
+    #     city = request.form.get('city')
+    #
+    #     date_format = "%Y-%m-%d"
+    #     check_in = datetime.strptime(check_in, date_format)
+    #     check_out = datetime.strptime(check_out, date_format)
+    #     if min_price != '':
+    #         min_price = float(min_price)
+    #     else:
+    #         min_price = None
+    #
+    #     if max_price != '':
+    #         max_price = float(max_price)
+    #     else:
+    #         max_price = None
+    #
+    #     if people != '':
+    #         people = int(people)
+    #     else:
+    #         people = None
+    #     rooms = filter_rooms(check_in, check_out, min_price, max_price, people)
 
     return render_template("rooms_list.html", user=current_user, rooms=rooms, curr_date=curr_date, max_date=max_date)
 
@@ -89,17 +103,17 @@ def reserve_list():
                 flash('Room booked successfully!', category='success')
             else:
                 flash('Room is already booked in this period of time.', category='error')
-    elif request.method == 'POST':
-        min_price = request.form.get('min_price')
-        max_price = request.form.get('max_price')
-        check_in = request.form.get('checkin-filter')
-        check_out = request.form.get('checkout-filter')
-        people = request.form.get('people')
-        city = request.form.get('city')
-
-        date_format = "%Y-%m-%d"
-        check_in = datetime.strptime(check_in, date_format)
-        check_out = datetime.strptime(check_out, date_format)
+    # elif request.method == 'POST':
+    #     min_price = request.form.get('min_price')
+    #     max_price = request.form.get('max_price')
+    #     check_in = request.form.get('checkin-filter')
+    #     check_out = request.form.get('checkout-filter')
+    #     people = request.form.get('people')
+    #     city = request.form.get('city')
+    #
+    #     date_format = "%Y-%m-%d"
+    #     check_in = datetime.strptime(check_in, date_format)
+    #     check_out = datetime.strptime(check_out, date_format)
 
     return render_template("reserve_rooms.html", user=current_user, rooms=rooms)
 
