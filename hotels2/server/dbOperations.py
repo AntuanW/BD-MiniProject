@@ -517,6 +517,9 @@ def get_all_user_bookings(user_id: str):
         }
     ]
     res = list(mongo.customers.aggregate(query))
+    for booking in res:
+        booking['date_from'] = booking['date_from'].date()
+        booking['date_to'] = booking['date_to'].date()
     return res
 
 

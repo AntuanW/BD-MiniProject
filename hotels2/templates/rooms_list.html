@@ -15,11 +15,11 @@
                 </div>
                 <div class="form-group">
                     <label for="checkin-filter">Check in</label>
-                    <input type="date" id="checkin-filter" name="checkin-filter" value={{ curr_date }}>
+                    <input type="date" id="checkin-filter" name="checkin-filter">
                 </div>
                 <div class="form-group">
                     <label for="checkout-filter">Check out</label>
-                    <input type="date" id="checkout-filter" name="checkout-filter" value={{ max_date }}>
+                    <input type="date" id="checkout-filter" name="checkout-filter">
                 </div>
                 <div class="form-group">
                     <label for="people">People in room</label>
@@ -29,8 +29,9 @@
                     <label for="city">City</label>
                     <select id="city" name="city">
                         <option value="select">Select a city</option>
-                        <option value="js">Javascript</option>
-                        <option value="php">PHP</option>
+                        {% for city in cities %}
+                            <option value={{ city['city'] }}>{{ city['city'] }}</option>
+                        {% endfor %}
                     </select>
                 </div>
             </div>
@@ -43,7 +44,10 @@
         <div class="rooms-wrapper">
             {% for room in rooms %}
             <div class="room-card">
-                <img src={{ room['imgUrl'] }}>
+                <img src={{ room['room_imgUrl'] }}>
+                <h3>Hotel: {{ room['hotel_name'] }}</h3>
+                <h3>City: {{ room['hotel_city'] }}</h3>
+                <h3>Street: {{ room['hotel_street'] }}</h3>
                 <h3>People in room: {{ room['room_type'] }}</h3>
                 <h3>Price per night: {{ room['price_per_night'] }} zł</h3>
             </div>

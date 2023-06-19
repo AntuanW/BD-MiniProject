@@ -44,45 +44,44 @@ def my_bookings():
 
 @views.route('/rooms', methods=['GET', 'POST'])
 def rooms_list():
-    curr_date = datetime.now().date()
-    curr_date = datetime.combine(curr_date, datetime.min.time())
-    max_date = datetime(2123, 12, 12, 0, 0, 0)
-    rooms = mongo.rooms.find()
-    # rooms = filter_rooms(curr_date, max_date)
-    # if request.method == 'POST':
-    #     min_price = request.form.get('min_price')
-    #     max_price = request.form.get('max_price')
-    #     check_in = request.form.get('checkin-filter')
-    #     check_out = request.form.get('checkout-filter')
-    #     people = request.form.get('people')
-    #     city = request.form.get('city')
-    #
-    #     date_format = "%Y-%m-%d"
-    #     check_in = datetime.strptime(check_in, date_format)
-    #     check_out = datetime.strptime(check_out, date_format)
-    #     if min_price != '':
-    #         min_price = float(min_price)
-    #     else:
-    #         min_price = None
-    #
-    #     if max_price != '':
-    #         max_price = float(max_price)
-    #     else:
-    #         max_price = None
-    #
-    #     if people != '':
-    #         people = int(people)
-    #     else:
-    #         people = None
-    #     rooms = filter_rooms(check_in, check_out, min_price, max_price, people)
+    cities = get_all_cities()
+    rooms = filter_rooms()
+    if request.method == 'POST':
+        min_price = request.form.get('min_price')
+        max_price = request.form.get('max_price')
+        check_in = request.form.get('checkin-filter')
+        check_out = request.form.get('checkout-filter')
+        people = request.form.get('people')
+        city = request.form.get('city')
 
-    return render_template("rooms_list.html", user=current_user, rooms=rooms, curr_date=curr_date, max_date=max_date)
+        date_format = "%Y-%m-%d"
+        check_in = datetime.strptime(check_in, date_format) if check_in != '' else None
+        check_out = datetime.strptime(check_out, date_format) if check_out != '' else None
+        min_price = float(min_price) if min_price != '' else None
+        max_price = float(max_price) if max_price != '' else None
+        people = int(people) if people != '' else None
+
+        if city == 'select':
+            city = None
+
+        curr_date = datetime.now().date()
+        curr_date = datetime.combine(curr_date, datetime.min.time())
+
+        if (check_in is not None and check_out is not None) and check_out < check_in:
+            flash('Check in date must be less or equal than check out date.', category='error')
+        elif check_in is not None and check_in < curr_date:
+            flash('Check in date must be greater or equal to current date.', category='error')
+        else:
+            rooms = filter_rooms(check_in, check_out, min_price, max_price, people, city)
+
+    return render_template("rooms_list.html", user=current_user, rooms=rooms, cities=cities)
 
 
 @views.route('/reserve_rooms', methods=['GET', 'POST'])
 @login_required
 def reserve_list():
-    rooms = list(mongo.rooms.find())
+    cities = get_all_cities()
+    rooms = filter_rooms()
     if request.method == 'POST' and request.form.get('checkin') is not None:
         date_format = "%Y-%m-%d"
         check_in = request.form.get('checkin')
@@ -90,8 +89,10 @@ def reserve_list():
 
         check_out = request.form.get('checkout')
         check_out = datetime.strptime(check_out, date_format)
-        print(check_out < check_in)
-        if check_in < datetime.now():
+
+        curr_date = datetime.now().date()
+        curr_date = datetime.combine(curr_date, datetime.min.time())
+        if check_in < curr_date:
             flash('Check in date must be greater than or equals current date.', category='error')
         elif check_out < check_in:
             flash('Check in date must be less or equal than check out date.', category='error')
@@ -103,19 +104,35 @@ def reserve_list():
                 flash('Room booked successfully!', category='success')
             else:
                 flash('Room is already booked in this period of time.', category='error')
-    # elif request.method == 'POST':
-    #     min_price = request.form.get('min_price')
-    #     max_price = request.form.get('max_price')
-    #     check_in = request.form.get('checkin-filter')
-    #     check_out = request.form.get('checkout-filter')
-    #     people = request.form.get('people')
-    #     city = request.form.get('city')
-    #
-    #     date_format = "%Y-%m-%d"
-    #     check_in = datetime.strptime(check_in, date_format)
-    #     check_out = datetime.strptime(check_out, date_format)
+    elif request.method == 'POST':
+        min_price = request.form.get('min_price')
+        max_price = request.form.get('max_price')
+        check_in = request.form.get('checkin-filter')
+        check_out = request.form.get('checkout-filter')
+        people = request.form.get('people')
+        city = request.form.get('city')
 
-    return render_template("reserve_rooms.html", user=current_user, rooms=rooms)
+        date_format = "%Y-%m-%d"
+        check_in = datetime.strptime(check_in, date_format) if check_in != '' else None
+        check_out = datetime.strptime(check_out, date_format) if check_out != '' else None
+        min_price = float(min_price) if min_price != '' else None
+        max_price = float(max_price) if max_price != '' else None
+        people = int(people) if people != '' else None
+
+        if city == 'select':
+            city = None
+
+        curr_date = datetime.now().date()
+        curr_date = datetime.combine(curr_date, datetime.min.time())
+
+        if (check_in is not None and check_out is not None) and check_out < check_in:
+            flash('Check in date must be less or equal than check out date.', category='error')
+        elif check_in is not None and check_in < curr_date:
+            flash('Check in date must be greater or equal to current date.', category='error')
+        else:
+            rooms = filter_rooms(check_in, check_out, min_price, max_price, people, city)
+
+    return render_template("reserve_rooms.html", user=current_user, rooms=rooms, cities=cities)
 
 
 @views.route('/remove-booking', methods=['POST'])

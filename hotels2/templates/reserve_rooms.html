@@ -29,8 +29,9 @@
                     <label for="city">City</label>
                     <select id="city" name="city">
                         <option value="select">Select a city</option>
-                        <option value="js">Javascript</option>
-                        <option value="php">PHP</option>
+                        {% for city in cities %}
+                            <option value={{ city['city'] }}>{{ city['city'] }}</option>
+                        {% endfor %}
                     </select>
                 </div>
             </div>
@@ -43,8 +44,10 @@
         <div class="rooms-wrapper">
             {% for room in rooms %}
             <div class="room-card">
-                <img src={{ room['imgUrl'] }}>
-                <h3 class="hotel-name">Nazwa hotelu</h3>
+                <img src={{ room['room_imgUrl'] }}>
+                <h3>Hotel: {{ room['hotel_name'] }}</h3>
+                <h3>City: {{ room['hotel_city'] }}</h3>
+                <h3>Street: {{ room['hotel_street'] }}</h3>
                 <h3>People in room: {{ room['room_type'] }}</h3>
                 <h3>Price per night: {{ room['price_per_night'] }} zł</h3>
                 <form method="POST" class="date-form">
@@ -56,7 +59,7 @@
                         <label for="checkout">Check out date:</label>
                         <input type="date" id="checkout" name="checkout" required>
                     </div>
-                    <input type="hidden" name="room_id" value={{ room['_id'] }}>
+                    <input type="hidden" name="room_id" value={{ room['room_id'] }}>
                     <input type="hidden" name="customer_id" value={{ current_user._id }}>
                     <div class="btn-wrap">
                         <button type="submit" class="reserve-btn">Book</button>
