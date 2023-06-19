@@ -361,11 +361,16 @@ def change_booking(customer_id: str, room_id: str, booking_id: str, check_in: da
 def get_occupied_rooms(check_in: datetime, check_out: datetime):
 
     booked_rooms = get_wrong_bookings(None, check_in, check_out, None)
-    return booked_rooms
+    res: set = set()
+    for i in booked_rooms:
+        pprint.pprint(i)
+        res.add(i['_id'])
+    return list(res)
 
 
 def filter_rooms(check_in: datetime, check_out: datetime, min_price: float = None, max_price: float = None,
                  room_type: int = None, hotel_id: str = None):
+
     black_list = get_occupied_rooms(check_in, check_out)
     query: list = [
         {  # 0
@@ -587,3 +592,21 @@ def remove_booking(booking_id: str, customer_id: str, room_id: str):
         print("[SERVER] Error during customer update")
         return False
     return True
+
+
+def get_all_cities():
+    query = [
+        {
+            '$group': {
+                '_id': '$city'
+            }
+        }, {
+            '$project': {
+                '_id': 0,
+                'city': '$_id'
+            }
+        }
+    ]
+    cities = mongo.hotels.aggregate(query)
+    return list(cities)
+

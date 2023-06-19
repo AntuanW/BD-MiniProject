@@ -21,7 +21,9 @@ if __name__ == '__main__':
     assert can_be_booked(room_id, left_1, check_in)
     assert can_be_booked(room_id, check_out, right_2)
     assert can_be_booked(room_id, right_1, right_2)
-    assert can_be_booked(room_id, check_in, right_2)
+
+    assert not can_be_booked(room_id, check_in, right_2)
+    assert can_be_booked(room_id, check_in, right_2, ObjectId('648b4a6492dececdfc9df7e9'))
 
     assert not can_be_booked(room_id, inside_1, inside_2)
     assert can_be_booked(room_id, inside_1, inside_2, booking_id)

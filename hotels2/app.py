@@ -9,4 +9,5 @@ app = create_app()
 
 if __name__ == '__main__':
     # app.run(debug=True)
-    pprint.pp(get_occupied_rooms(datetime(2023, 6, 19), datetime(2023, 12, 12)))
+    pprint.pp(get_occupied_rooms(datetime(2123, 6, 19), datetime(2123, 12, 12)))
+    pprint.pprint(get_all_cities())
