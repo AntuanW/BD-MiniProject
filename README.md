@@ -10,6 +10,20 @@ Temat projektu:
 Technologia:
     MongoDB, Python Flask
 
+### Instrukcja uruchomienia aplikacji
+Instalujemy odpowiednie requirements:
+```
+pip install -r requirements.txt
+```
+
+Do folderu server dodajemy plik o nazwie .env i zamieszczamy w nim następujące informacje:
+```
+MONGODB_USERNAME = ""
+MONGODB_PASSWORD = ""
+```
+
+Następnie możemy uruchomić całą aplikację z poziomu pliku app.py.
+
 
 # Główna założenia projektu:
 - możliwość zarezerwowania noclegu w jednym z dostępnych hotelów w bazie danych (wyświetlenie dostępnych pokoi w danym okresie czasu)
