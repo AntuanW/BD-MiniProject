@@ -300,11 +300,18 @@ def add_new_booking(customer_id: str, room_id: str, check_in: datetime, check_ou
 
 
 def change_booking(customer_id: str, new_room: str, booking_id: str, check_in: datetime, check_out: datetime):
-    if can_be_booked(ObjectId(new_room), check_in, check_out, ObjectId(booking_id)):
+    try:
+        new_room = ObjectId(new_room)
+        booking_id = ObjectId(booking_id)
+        customer_id = ObjectId(customer_id)
+    except Exception as e:
+        print("[SERVER]", e)
+        return False
+    if can_be_booked(new_room, check_in, check_out, booking_id):
         old_room = mongo.customers.aggregate([
             {
                 '$match': {
-                    '_id': ObjectId(customer_id)
+                    '_id': customer_id
                 }
             },
             {
@@ -318,7 +325,7 @@ def change_booking(customer_id: str, new_room: str, booking_id: str, check_in: d
             },
             {
                 '$match': {
-                    'bookings.booking_id': ObjectId(booking_id)
+                    'bookings.booking_id': booking_id
                 }
             },
             {
@@ -333,11 +340,11 @@ def change_booking(customer_id: str, new_room: str, booking_id: str, check_in: d
         mongo.customers.update_one(
             {
                 "_id": ObjectId(customer_id),
-                "bookings.booking_id": ObjectId(booking_id)
+                "bookings.booking_id": booking_id
             },
             {
                 "$set": {
-                    "bookings.$.room_id": ObjectId(new_room),
+                    "bookings.$.room_id": new_room,
                     "bookings.$.date_from": check_in,
                     "bookings.$.date_to": check_out
                 }
@@ -347,17 +354,17 @@ def change_booking(customer_id: str, new_room: str, booking_id: str, check_in: d
         # remove and update Rooms
         mongo.rooms.update_one({"_id": old_room}, {
             "$pull": {
-                "bookings": {"booking_id": ObjectId(booking_id)}
+                "bookings": {"booking_id": booking_id}
             }
         })
 
         booking_in_rooms = {
-            "booking_id": ObjectId(booking_id),
-            "customer_id": ObjectId(customer_id),
+            "booking_id": booking_id,
+            "customer_id": customer_id,
             "date_from": check_in,
             "date_to": check_out
         }
-        room_update = mongo.rooms.update_one({"_id": ObjectId(new_room)}, {
+        room_update = mongo.rooms.update_one({"_id": new_room}, {
             "$push": {
                 "bookings": booking_in_rooms
             }
