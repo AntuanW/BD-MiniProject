@@ -175,7 +175,8 @@ def can_be_booked(room_id: ObjectId, check_in: datetime, check_out: datetime, bo
     query = [
         {
             '$match': {
-                '_id': ObjectId(room_id)
+                '_id': ObjectId(room_id),
+                'is_available': True
             }
         },
         {
@@ -350,9 +351,16 @@ def change_booking(customer_id: str, room_id: str, booking_id: str, check_in: da
         return False
 
 
-def filter_rooms(min_price: float = None, max_price: float = None,
-                 check_in: datetime = None, check_out: datetime = None,
+def get_occupied_rooms(check_in: datetime, check_out: datetime):
+    date_from, date_to = check_in, check_out
+    if check_in is None:
+        date_from = datetime()
+    pass
+
+
+def filter_rooms(check_in: datetime, check_out: datetime, min_price: float = None, max_price: float = None,
                  hotel_id: str = None, room_type: int = None):
+    black_list = []
     query: list = [
         {  # 0
             '$match': {
@@ -395,14 +403,7 @@ def filter_rooms(min_price: float = None, max_price: float = None,
                         }
                     },
                     {
-                        'bookings.date_from': {
-                            '$gte': datetime(2223, 7, 18)
-                        }
-                    },
-                    {
-                        'bookings.date_to': {
-                            '$lte': datetime(2223, 7, 1)
-                        }
+                        '_id': {'$nin': black_list}
                     }
                 ]
             }
@@ -437,10 +438,6 @@ def filter_rooms(min_price: float = None, max_price: float = None,
         query[0]['$match']['price_per_night']['$gte'] = min_price
     if max_price is not None:
         query[0]['$match']['price_per_night']['$gte'] = max_price
-    if check_in is not None:
-        query[4]['$match']['$or'][2]['bookings.date_to']['$lte'] = check_in
-    if check_out is not None:
-        query[4]['$match']['$or'][1]['bookings.date_from']['$gte'] = check_out
     if hotel_id is not None:
         try:
             _id = ObjectId(hotel_id)
