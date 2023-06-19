@@ -18,8 +18,8 @@ pip install -r requirements.txt
 
 Do folderu server dodajemy plik o nazwie .env i zamieszczamy w nim następujące informacje:
 ```
-MONGODB_USERNAME = ""
-MONGODB_PASSWORD = ""
+MONGODB_USERNAME = "guest"
+MONGODB_PASSWORD = "1oiy2cwCh14dYC2s"
 ```
 
 Następnie możemy uruchomić całą aplikację z poziomu pliku app.py.
