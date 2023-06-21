@@ -45,7 +45,7 @@ Następnie możemy uruchomić całą aplikację z poziomu pliku app.py.
 ## Struktura bazy danych
 
 ### Hotels
-```
+```js
 {  
     "name": string,  
     "street": string,  
@@ -55,7 +55,7 @@ Następnie możemy uruchomić całą aplikację z poziomu pliku app.py.
 ```
 
 ### Rooms
-```
+```js
 {   
     "hotel_id": ObjectId(),  
     "room_type": string,  
@@ -74,7 +74,7 @@ Następnie możemy uruchomić całą aplikację z poziomu pliku app.py.
 ```
 
 ### Customers
-```
+```js
 {   
     "name": string,  
     "surname": string,  
@@ -90,7 +90,7 @@ Następnie możemy uruchomić całą aplikację z poziomu pliku app.py.
 ```
 
 ### Booking_logs
-```
+```js
 {
   "booking_id": ObjectId
   "customer_id": ObjectId,
@@ -201,7 +201,7 @@ exports = async function() {
 ## Schema validators dla naszego schematu
 
 ### Hotels
-```
+```js
 {
     "$jsonSchema": {
         "bsonType": "object",
@@ -229,7 +229,7 @@ exports = async function() {
 ```
 
 ### Rooms
-```
+```js
 {
     "$jsonSchema": {
         "bsonType": "object",
@@ -281,7 +281,7 @@ exports = async function() {
 ```
 
 ### Customers
-```
+```js
 {
     "$jsonSchema": {
         "bsonType": "object",
@@ -325,7 +325,7 @@ exports = async function() {
 ```
 
 ### Booking_Logs
-```
+```js
 {
     "$jsonSchema": {
         "bsonType": "object",
