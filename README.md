@@ -17,7 +17,7 @@ MongoDB, Python Flask
 3. [Struktura bazy danych](##Struktura bazy danych)
 4. [Metody i funkcje korzystające z więcej niż jednej kolekcji](##Metody i funkcje korzystające z więcej niż jednej kolekcji)
 5. [Trigger sprzątający nieaktualne rezerwacje z kolekcji Rooms](##Trigger sprzątający nieaktualne rezerwacje z kolekcji Rooms)
-6. [Schema validators dla naszego schematu](##Schema validators dla naszego schematu)
+6. [Schema validators dla naszego schematu](##Schema_validators-dla-naszego-schematu)
 7. [Widoki](##Widoki)
 
 
