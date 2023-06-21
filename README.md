@@ -15,7 +15,7 @@ MongoDB, Python Flask
 1. [Instrukcja uruchomienia aplikacji](#instrukcja-uruchomienia-aplikacji)
 2. [Główne założenia/funkcjonalności projektu](#główne-funkcjonalności-projektu)
 3. [Struktura bazy danych](#struktura-bazy-danych)
-4. [Metody i funkcje korzystające z więcej niż jednej kolekcji](#metody-i-funkcje-korzystające-z-więcej-niż-jednej-kolekcji)
+4. [Metody i funkcje korzystające z więcej niż jednej kolekcji](#metody-i-funkcje-operujące-na-bazie-danych)
 5. [Trigger sprzątający nieaktualne rezerwacje z kolekcji Rooms](#trigger-sprzątający-nieaktualne-rezerwacje-z-kolekcji-Rooms)
 6. [Schema validators dla naszego schematu](#schema-validators-dla-naszego-schematu)
 7. [Widoki](#widoki)
@@ -99,7 +99,7 @@ Następnie możemy uruchomić całą aplikację z poziomu pliku app.py.
 }
 ```
 
-## Metody i funcje operujące na poszczególnych kolekcjach
+## Metody i funkcje operujące na bazie danych
 ### Część z nich, nie jest wykorzystywana w aplikacji, ponieważ nie udało się zaimplementować, niektórych funkcjonalności, ale przydatne są przy zarządzaniu bazą danych
 
 - Hotels
@@ -120,7 +120,7 @@ Następnie możemy uruchomić całą aplikację z poziomu pliku app.py.
   - get_user_email(email) - zwraca użytkownika o podanym emailu - przydatna w uwierzytelnianiu użytkownika
   - remove_customer(customer_id) - usuwa użytkownika z bazdy danych
 
-## Metody i funkcje korzystające z więcej niż jednej kolekcji
+### Metody i funkcje korzystające z więcej niż jednej kolekcji
 - can_be_booked(room_id, check_in, check_out, booking_id) - funkcja pomocnicza, korzystająca z get_wrong_bookings - sprawdza czy można zarezerwować podany pokój na konkretny termin
 - push_bookings(booking_id, customer_id, room_id, check_in, check_out) - funkcja pomocnicza - dodaje odpowiednie dane do odpowiedniego pokoju i użytkownika na temat rezerwacji
 - add_new_booking(customer_id, room_id, check_in, check_out) - dodanie nowej rezerwacji - dodawana jest w kolekcji Customers i Rooms (o ile to możliwe)
