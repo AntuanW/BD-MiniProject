@@ -15,7 +15,7 @@ MongoDB, Python Flask
 1. [Instrukcja uruchomienia aplikacji](#instrukcja-uruchomienia-aplikacji)
 2. [Główne założenia/funkcjonalności projektu](#główne-funkcjonalności-projektu)
 3. [Struktura bazy danych](#struktura-bazy-danych)
-4. [Metody i funkcje korzystające z więcej niż jednej kolekcji](#metody-i-funkcje-operujące-na-bazie-danych)
+4. [Metody i funkcje operujące na bazie danych](#metody-i-funkcje-operujące-na-bazie-danych)
 5. [Trigger sprzątający nieaktualne rezerwacje z kolekcji Rooms](#trigger-sprzątający-nieaktualne-rezerwacje-z-kolekcji-Rooms)
 6. [Schema validators dla naszego schematu](#schema-validators-dla-naszego-schematu)
 7. [Widoki](#widoki)
