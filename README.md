@@ -12,14 +12,30 @@ MongoDB, Python Flask
 
 ## Spis treści dokumentacji
 
-1. [Instrukcja uruchomienia aplikacji](#instrukcja-uruchomienia-aplikacji)
-2. [Główne założenia/funkcjonalności projektu](#główne-funkcjonalności-projektu)
-3. [Struktura bazy danych](#struktura-bazy-danych)
-4. [Metody i funkcje operujące na bazie danych](#metody-i-funkcje-operujące-na-bazie-danych)
-5. [Opis kodu najważniejszych funkcjonalności projektu](#opis-kodu-najważniejszych-funkcjonalności-projektu)
-6. [Trigger sprzątający nieaktualne rezerwacje z kolekcji Rooms](#trigger-sprzątający-nieaktualne-rezerwacje-z-kolekcji-Rooms)
-7. [Schema validators dla naszego schematu](#schema-validators-dla-naszego-schematu)
-8. [Widoki](#widoki)
+- [BD-MiniProject](#bd-miniproject)
+  - [Temat projektu:](#temat-projektu)
+  - [Technologia:](#technologia)
+  - [Spis treści dokumentacji](#spis-treści-dokumentacji)
+  - [Instrukcja uruchomienia aplikacji](#instrukcja-uruchomienia-aplikacji)
+  - [Główne funkcjonalności projektu](#główne-funkcjonalności-projektu)
+  - [Struktura bazy danych](#struktura-bazy-danych)
+    - [Hotels](#hotels)
+    - [Rooms](#rooms)
+    - [Customers](#customers)
+    - [Booking\_logs](#booking_logs)
+  - [Metody i funkcje operujące na bazie danych](#metody-i-funkcje-operujące-na-bazie-danych)
+    - [Część z nich, nie jest wykorzystywana w aplikacji, ponieważ nie udało się zaimplementować, niektórych funkcjonalności, ale przydatne są przy zarządzaniu bazą danych](#część-z-nich-nie-jest-wykorzystywana-w-aplikacji-ponieważ-nie-udało-się-zaimplementować-niektórych-funkcjonalności-ale-przydatne-są-przy-zarządzaniu-bazą-danych)
+    - [Metody i funkcje korzystające z więcej niż jednej kolekcji](#metody-i-funkcje-korzystające-z-więcej-niż-jednej-kolekcji)
+  - [Opis kodu najważniejszych funkcjonalności projektu](#opis-kodu-najważniejszych-funkcjonalności-projektu)
+    - [Rezerwacja pokoju, zmiana terminów już zarezerwowanego pokoju](#rezerwacja-pokoju-zmiana-terminów-już-zarezerwowanego-pokoju)
+    - [Filtrowanie listy dostepnych pokoi](#filtrowanie-listy-dostepnych-pokoi)
+  - [Trigger sprzątający nieaktualne rezerwacje z kolekcji Rooms](#trigger-sprzątający-nieaktualne-rezerwacje-z-kolekcji-rooms)
+  - [Schema validators dla naszego schematu](#schema-validators-dla-naszego-schematu)
+    - [Hotels](#hotels-1)
+    - [Rooms](#rooms-1)
+    - [Customers](#customers-1)
+    - [Booking\_Logs](#booking_logs-1)
+  - [Widoki](#widoki)
 
 
 ## Instrukcja uruchomienia aplikacji
@@ -133,7 +149,109 @@ Następnie możemy uruchomić całą aplikację z poziomu pliku app.py.
 ## Opis kodu najważniejszych funkcjonalności projektu
 
 ### Rezerwacja pokoju, zmiana terminów już zarezerwowanego pokoju
+Aby zrozumieć najważniejsze funkcje aplikacji, należy zacząć od funkcji pomocniczych. Funkcja `get_wrong_bookings` zwraca listę rezerwacji kolidujących z wybranym przez nas terminem dla danego pokoju. Domyślnie przyjmuje ona id pokoju oraz daty zameldowania i wymeldowania. Może jednak przyjąć dodatkowo id_bookingu - nie jest on wówczas brany pod uwagę przy analizie kolidujących terminów; ma to znaczenie podczas zmiany daty posiadanego już przez nas bookingu. Funkcja może nie przyjąć również id pokoju - zwróci listę wszystkich kolidujących z danym terminem bookingów.<br>
+Poniżej omówimy kod funkcji waz zapytaniem wysyłanym do MongoDB:<br>
+```python
+def get_wrong_bookings(room_id: ObjectId, check_in: datetime, check_out: datetime, booking_id: ObjectId):
+    # pipeline wywoływany funkcją aggregate (nazwany query) składa się z następujących etapów:
+    query = [
+        {   # Etap 1 - wybierz pokoje o podanym _id, dostępne do użytku(is_available)
+            '$match': {
+                '_id': {'$exists': 1},  # zapytanie we wstępnej wersji ustawione jest, aby zwracało każde pokoje
+                'is_available': True
+            }
+        },
+        {   # Etap 2 - pozbycie się nieporzebnych pól
+            '$project': {
+                'bookings': 1
+            }
+        },
+        {   # Etap 3 - rozpakowanie dla każdego pokoju tablicy bookingów złożonych na niego - tworzy się dzięki temu kolekcja wszystkich rezerwacji spełniających dotychczasowe warunki.
+            '$unwind': '$bookings'
+        }
+    ]
+    # Jeżeli szukami kolizji dla danego pokoju, w tym miejscu dokonujemy modyfikacji naszego query
+    if room_id is not None:
+        query[0]['$match']['_id'] = room_id
 
+    # Gdy chcemy wykluczyć rezerwacje o danym id, dodawany jest dodatkowy etap do tworzonego pipeline
+    if booking_id is not None:
+        query.append({  # Etap dodatkowy - filtrowanie bookingów nie będących podanym przez nas id
+            "$match": {
+                "bookings.booking_id": {'$nin': [ObjectId(booking_id)]}
+            }
+        })
+    query.append({  # Etap 4 - wyranie bookingów kolidujących z nasszym terminem
+        '$match': {
+            '$or': [
+                {
+                    '$and': [
+                        {
+                            'bookings.date_from': {
+                                '$gte': check_in
+                            }
+                        }, {
+                            'bookings.date_from': {
+                                '$lt': check_out
+                            }
+                        }
+                    ]
+                }, {
+                    '$and': [
+                        {
+                            'bookings.date_from': {
+                                '$gte': check_in
+                            }
+                        }, {
+                            'bookings.date_to': {
+                                '$lte': check_out
+                            }
+                        }
+                    ]
+                }, {
+                    '$and': [
+                        {
+                            'bookings.date_from': {
+                                '$lte': check_in
+                            }
+                        }, {
+                            'bookings.date_to': {
+                                '$gte': check_out
+                            }
+                        }
+                    ]
+                }, {
+                    '$and': [
+                        {
+                            'bookings.date_to': {
+                                '$gt': check_in
+                            }
+                        }, {
+                            'bookings.date_to': {
+                                '$lte': check_out
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    })
+
+    # funkcja zwraca listę kolidujących bookingów
+    return list(mongo.rooms.aggregate(query))
+```
+Aby sprawdzić, czy pokój może zostać zarezerwowany, używamy funkcji `can_be_booked()`. Nie jest ona skomplikowana, bazuje na poznanej wyżej funkcji `get_wrong_bookings()`, sprawdzając, czy jest ona pusta:<br>
+```python
+def can_be_booked(room_id: ObjectId, check_in: datetime, check_out: datetime, booking_id: ObjectId = None):
+    if check_in >= check_out:
+        print("[SERVER] Check in date must be less than check out date.")
+        return False
+
+    bookings = get_wrong_bookings(room_id, check_in, check_out, booking_id)
+
+    return len(bookings) == 0
+```
+Posiadając te funkcje, jesteśmy w stanie tworzyć bookingi oraz zmieniać ich daty jeżeli użytkowanik sobie tego zażyczy.<br>
 
 ### Filtrowanie listy dostepnych pokoi
 
