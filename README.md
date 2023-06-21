@@ -16,9 +16,10 @@ MongoDB, Python Flask
 2. [Główne założenia/funkcjonalności projektu](#główne-funkcjonalności-projektu)
 3. [Struktura bazy danych](#struktura-bazy-danych)
 4. [Metody i funkcje operujące na bazie danych](#metody-i-funkcje-operujące-na-bazie-danych)
-5. [Trigger sprzątający nieaktualne rezerwacje z kolekcji Rooms](#trigger-sprzątający-nieaktualne-rezerwacje-z-kolekcji-Rooms)
-6. [Schema validators dla naszego schematu](#schema-validators-dla-naszego-schematu)
-7. [Widoki](#widoki)
+5. [Opis kodu najważniejszych funkcjonalności projektu](#opis-kodu-najważniejszych-funkcjonalności-projektu)
+6. [Trigger sprzątający nieaktualne rezerwacje z kolekcji Rooms](#trigger-sprzątający-nieaktualne-rezerwacje-z-kolekcji-Rooms)
+7. [Schema validators dla naszego schematu](#schema-validators-dla-naszego-schematu)
+8. [Widoki](#widoki)
 
 
 ## Instrukcja uruchomienia aplikacji
@@ -128,6 +129,14 @@ Następnie możemy uruchomić całą aplikację z poziomu pliku app.py.
 - filter_rooms(check_in, check_out, min_price, max_price, room_type, hotel_city) - zwraca listę pokoi, spełniających podane kryteria (np. cena min i max, liczba osób w pokoju, pokoje wolne w danym terminie itp.)
 - remove_booking(booking_id, customer_id, room_id) - usuwa danę rezerwację z obu kolekcji - Rooms i Customers
 - add_validators() - dodaje do bazy danych walidatory, których schemat pokazany jest poniżej
+
+## Opis kodu najważniejszych funkcjonalności projektu
+
+### Rezerwacja pokoju, zmiana terminów już zarezerwowanego pokoju
+
+
+### Filtrowanie listy dostepnych pokoi
+
 
 ## Trigger sprzątający nieaktualne rezerwacje z kolekcji Rooms
 W Atlasie stworzyliśmy trigger, który usuwa przeszłe bookingi z kolekcji Rooms, w celu optymalizacji bazy danych (tablice te urosłyby szybko do ogromnych rozmiarów).
