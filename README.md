@@ -4,32 +4,44 @@ Grzegorz Piśkorski: piskorski@student.agh.edu.pl
 
 Antoni Wójcik: antoniwojcik@student.agh.edu.pl
 
-Temat projektu:
-    Rezerwowanie noclegów w hotelach. Aplikacja będzie pozwalała na rezerwację pokojów w kilku wybranych hotelach.
+## Temat projektu:
+Rezerwowanie noclegów w hotelach. Aplikacja będzie pozwalała na rezerwację pokojów w kilku wybranych hotelach.
 
-Technologia:
-    MongoDB, Python Flask
+## Technologia:
+MongoDB, Python Flask
 
-### Instrukcja uruchomienia aplikacji
-Instalujemy odpowiednie requirements:
+## Spis treści dokumentacji
+
+1. [Instrukcja uruchomienia aplikacji](##Instrukcja uruchomienia aplikacji)
+2. [Główne założenia/funkcjonalności projektu](##Główne założenia/funkcjonalności projektu)
+3. [Struktura bazy danych](##Struktura bazy danych)
+4. [Metody i funkcje korzystające z więcej niż jednej kolekcji](##Metody i funkcje korzystające z więcej niż jednej kolekcji)
+5. [Trigger sprzątający nieaktualne rezerwacje z kolekcji Rooms](##Trigger sprzątający nieaktualne rezerwacje z kolekcji Rooms)
+6. [Schema validators dla naszego schematu](##Schema validators dla naszego schematu)
+7. [Widoki](##Widoki)
+
+
+## Instrukcja uruchomienia aplikacji
+
+1. Instalujemy odpowiednie requirements:
 ```
 pip install -r requirements.txt
 ```
 
-Do folderu server dodajemy plik o nazwie .env i zamieszczamy w nim następujące informacje:
+2. Do folderu server dodajemy plik o nazwie .env i zamieszczamy w nim login i hasło dostępu do bazy:
 ```
-MONGODB_USERNAME = "guest"
-MONGODB_PASSWORD = "1oiy2cwCh14dYC2s"
+MONGODB_USERNAME = ...
+MONGODB_PASSWORD = ...
 ```
 
 Następnie możemy uruchomić całą aplikację z poziomu pliku app.py.
 
 
-# Główna założenia projektu:
+## Główne założenia/funkcjonalności projektu
 - możliwość zarezerwowania noclegu w jednym z dostępnych hotelów w bazie danych (wyświetlenie dostępnych pokoi w danym okresie czasu)
 - możliwość zarządzania swoją rezerwacją (dodanie nowej, modyfikacja jednej z "posiadanych" rezerwacji, rezygnacja z rezerwacji)
 
-# Propozycja bazy danych:
+## Struktura bazy danych
 
 ### Hotels
 ```
@@ -87,7 +99,7 @@ Następnie możemy uruchomić całą aplikację z poziomu pliku app.py.
 }
 ```
 
-# Metody i funcje operujące na poszczególnych kolekcjach
+## Metody i funcje operujące na poszczególnych kolekcjach
 ### Część z nich, nie jest wykorzystywana w aplikacji, ponieważ nie udało się zaimplementować, niektórych funkcjonalności, ale przydatne są przy zarządzaniu bazą danych
 
 - Hotels
@@ -108,7 +120,7 @@ Następnie możemy uruchomić całą aplikację z poziomu pliku app.py.
   - get_user_email(email) - zwraca użytkownika o podanym emailu - przydatna w uwierzytelnianiu użytkownika
   - remove_customer(customer_id) - usuwa użytkownika z bazdy danych
 
-# Metody i funkcje korzystające z więcej niż jednej kolekcji
+## Metody i funkcje korzystające z więcej niż jednej kolekcji
 - can_be_booked(room_id, check_in, check_out, booking_id) - funkcja pomocnicza, korzystająca z get_wrong_bookings - sprawdza czy można zarezerwować podany pokój na konkretny termin
 - push_bookings(booking_id, customer_id, room_id, check_in, check_out) - funkcja pomocnicza - dodaje odpowiednie dane do odpowiedniego pokoju i użytkownika na temat rezerwacji
 - add_new_booking(customer_id, room_id, check_in, check_out) - dodanie nowej rezerwacji - dodawana jest w kolekcji Customers i Rooms (o ile to możliwe)
@@ -117,21 +129,30 @@ Następnie możemy uruchomić całą aplikację z poziomu pliku app.py.
 - remove_booking(booking_id, customer_id, room_id) - usuwa danę rezerwację z obu kolekcji - Rooms i Customers
 - add_validators() - dodaje do bazy danych walidatory, których schemat pokazany jest poniżej
 
-# Trigger sprzątający nieaktualne rezerwacje z kolekcji Rooms:
+## Trigger sprzątający nieaktualne rezerwacje z kolekcji Rooms
 W Atlasie stworzyliśmy trigger, który usuwa przeszłe bookingi z kolekcji Rooms, w celu optymalizacji bazy danych (tablice te urosłyby szybko do ogromnych rozmiarów).
-Jego kod zamieściliśmy w pliku TRIGGER.js:
+Jego kod wraz z komentarzami opisującymi działanie:
 ```js
 exports = async function() {
+  // Pobranie aktualnej daty i czasu
   const currentDate = new Date();
+
+  // Pobranie kolekcji Rooms i Booking_Logs
   const collectionRooms = context.services.get("HotelsCluster").db("HotelsDB").collection("Rooms");
   const collectionBookingLogs = context.services.get("HotelsCluster").db("HotelsDB").collection("Booking_Logs");
 
   try {
+    // Warunek wyszukiwania rezerwacji do usunięcia
     const filter = { "bookings.date_to": { $lt: currentDate } };
+
+    // Projekcja dla wyszukiwania rezerwacji do usunięcia
     const projection = { bookings: { $elemMatch: { date_to: { $lt: currentDate } } } };
+
+    // Wyszukanie i zapisanie rezerwacji do usunięcia
     const bookingsToRemove = await collectionRooms.find(filter, projection).toArray();
 
     if (bookingsToRemove.length > 0) {
+      // Przygotowanie operacji zbiorczych do usunięcia rezerwacji
       const bulkOps = bookingsToRemove.map(booking => ({
         updateOne: {
           filter: { _id: booking._id },
@@ -139,8 +160,10 @@ exports = async function() {
         }
       }));
 
+      // Usunięcie rezerwacji z kolekcji Rooms
       await collectionRooms.bulkWrite(bulkOps);
 
+      // Przygotowanie danych rezerwacji do zapisania w kolekcji Booking_Logs
       const bookingLogs = bookingsToRemove.flatMap(booking => booking.bookings.map(bookingData => ({
         room_id: booking._id,
         booking_id: bookingData.booking_id,
@@ -149,21 +172,26 @@ exports = async function() {
         date_to: bookingData.date_to
       })));
 
+      // Zapisanie rezerwacji w kolekcji Booking_Logs
       await collectionBookingLogs.insertMany(bookingLogs);
 
+      // Wyświetlenie informacji o liczbie przeniesionych rezerwacji
       console.log(`Moved ${bookingsToRemove.length} bookings to BookingLogs collection.`);
     } else {
+      // Wyświetlenie informacji o braku rezerwacji do przeniesienia
       console.log("No bookings to move.");
     }
   } catch (err) {
+    // Obsługa błędu
     console.error(err);
   }
 };
+
 ```
 
-# Schema validators dla naszego schematu
+## Schema validators dla naszego schematu
 
-## Hotels
+### Hotels
 ```
 {
     "$jsonSchema": {
@@ -191,7 +219,7 @@ exports = async function() {
 }
 ```
 
-## Rooms
+### Rooms
 ```
 {
     "$jsonSchema": {
@@ -243,7 +271,7 @@ exports = async function() {
 }
 ```
 
-## Customers
+### Customers
 ```
 {
     "$jsonSchema": {
@@ -287,7 +315,7 @@ exports = async function() {
 }
 ```
 
-## Booking_Logs
+### Booking_Logs
 ```
 {
     "$jsonSchema": {
@@ -314,7 +342,7 @@ exports = async function() {
 }
 ```
 
-# Widoki - frontend
+## Widoki
 - start_page - strona startowa, którą widzimy po wejściu do aplikacji
 - login - widok logowania
 - signup - widok tworzenia konta

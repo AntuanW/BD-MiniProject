@@ -6,6 +6,7 @@ from datetime import datetime
 from bson.objectid import ObjectId
 from hotels2.models.validators import *
 import re
+from pprint import pprint
 
 mongo = MongoConnection()
 
@@ -101,7 +102,7 @@ def set_price_per_night(room_id: str, new_price):
         return True
     except Exception as e:
         print("[SERVER] Validation failed")
-        pprint.pprint(e)
+        pprint(e)
         return False
 
 
