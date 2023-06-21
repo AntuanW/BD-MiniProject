@@ -12,12 +12,12 @@ MongoDB, Python Flask
 
 ## Spis treści dokumentacji
 
-1. [Instrukcja uruchomienia aplikacji](##Instrukcja uruchomienia aplikacji)
-2. [Główne założenia/funkcjonalności projektu](##Główne założenia/funkcjonalności projektu)
-3. [Struktura bazy danych](##Struktura bazy danych)
-4. [Metody i funkcje korzystające z więcej niż jednej kolekcji](##Metody i funkcje korzystające z więcej niż jednej kolekcji)
-5. [Trigger sprzątający nieaktualne rezerwacje z kolekcji Rooms](##Trigger sprzątający nieaktualne rezerwacje z kolekcji Rooms)
-6. [Schema validators dla naszego schematu](#schema_validators-dla-naszego-schematu)
+1. [Instrukcja uruchomienia aplikacji](#instrukcja-uruchomienia-aplikacji)
+2. [Główne założenia/funkcjonalności projektu](#główne-funkcjonalności-projektu)
+3. [Struktura bazy danych](#struktura-bazy-danych)
+4. [Metody i funkcje korzystające z więcej niż jednej kolekcji](#metody-i-funkcje-korzystające-z-więcej-niż-jednej-kolekcji)
+5. [Trigger sprzątający nieaktualne rezerwacje z kolekcji Rooms](#trigger-sprzątający-nieaktualne-rezerwacje-z-kolekcji-Rooms)
+6. [Schema validators dla naszego schematu](#schema-validators-dla-naszego-schematu)
 7. [Widoki](#widoki)
 
 
@@ -37,7 +37,7 @@ MONGODB_PASSWORD = ...
 Następnie możemy uruchomić całą aplikację z poziomu pliku app.py.
 
 
-## Główne założenia/funkcjonalności projektu
+## Główne funkcjonalności projektu
 - możliwość zarezerwowania noclegu w jednym z dostępnych hotelów w bazie danych (wyświetlenie dostępnych pokoi w danym okresie czasu)
 - możliwość zarządzania swoją rezerwacją (dodanie nowej, modyfikacja jednej z "posiadanych" rezerwacji, rezygnacja z rezerwacji)
 
