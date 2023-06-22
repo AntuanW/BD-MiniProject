@@ -4,17 +4,17 @@ Grzegorz Piśkorski: piskorski@student.agh.edu.pl
 
 Antoni Wójcik: antoniwojcik@student.agh.edu.pl
 
-## Temat projektu:
+## Temat projektu
 Rezerwowanie noclegów w hotelach. Aplikacja będzie pozwalała na rezerwację pokoi w kilku wybranych hotelach.
 
-## Technologia:
+## Technologia
 MongoDB, Python Flask, Jinja2
 
 ## Spis treści dokumentacji
 
 - [BD-MiniProject](#bd-miniproject)
-  - [Temat projektu:](#temat-projektu)
-  - [Technologia:](#technologia)
+  - [Temat projektu](#temat-projektu)
+  - [Technologia](#technologia)
   - [Spis treści dokumentacji](#spis-treści-dokumentacji)
   - [Instrukcja uruchomienia aplikacji](#instrukcja-uruchomienia-aplikacji)
   - [Główne funkcjonalności projektu](#główne-funkcjonalności-projektu)
@@ -149,7 +149,7 @@ Część z nich nie jest wykorzystywana w aplikacji, ponieważ nie udało się z
 ## Opis kodu najważniejszych funkcjonalności projektu
 
 ### Rezerwacja pokoju, zmiana terminów już zarezerwowanego pokoju
-Aby zrozumieć najważniejsze funkcje aplikacji, należy zacząć od funkcji pomocniczych. Funkcja `get_wrong_bookings` zwraca listę rezerwacji kolidujących z wybranym przez nas terminem dla danego pokoju. Domyślnie przyjmuje ona id pokoju oraz daty zameldowania i wymeldowania. Może jednak przyjąć dodatkowo id_bookingu - nie jest on wówczas brany pod uwagę przy analizie kolidujących terminów; ma to znaczenie podczas zmiany daty posiadanego już przez nas bookingu. Funkcja może nie przyjąć również id pokoju - zwróci listę wszystkich kolidujących z danym terminem bookingów.<br>
+Aby zrozumieć najważniejsze funkcje aplikacji, należy zacząć od funkcji pomocniczych. Funkcja `get_wrong_bookings` zwraca listę rezerwacji kolidujących z wybranym przez nas terminem dla danego pokoju. Domyślnie przyjmuje ona id pokoju oraz daty zameldowania i wymeldowania. Może jednak przyjąć dodatkowo id bookingu - nie jest on wówczas brany pod uwagę przy analizie kolidujących terminów; ma to znaczenie podczas zmiany daty posiadanego już przez nas bookingu. Funkcja może nie przyjąć również id pokoju - zwróci listę wszystkich kolidujących z danym terminem bookingów.<br>
 Poniżej omówimy kod funkcji waz zapytaniem wysyłanym do MongoDB:<br>
 ```python
 def get_wrong_bookings(room_id: ObjectId, check_in: datetime, check_out: datetime, booking_id: ObjectId):
@@ -362,6 +362,7 @@ def change_booking(customer_id: str, room_id: str, booking_id: str, check_in: da
         return False
 ```
 
+### Filtrowanie listy dostepnych pokoi
 Kolejną z najważniejszych funkcjonalności jest filtrowanie dostępnych pokoi. Aby zrozumieć kod, należy najpierw zapoznać się z funkcją `get_occupied_rooms()`.
 Korzysta ona ze znanej już nam funkcji `get_wrong_bookings()`, następnie zamienia listę kolidujących rezerwacji na listę id pokoi, których te rezerwacje dotyczą.
 ```python
@@ -449,8 +450,6 @@ def filter_rooms(check_in: datetime = datetime(2400, 1, 1), check_out: datetime 
     result = mongo.rooms.aggregate(query)
     return list(result)
 ```
-
-### Filtrowanie listy dostepnych pokoi
 
 ## Trigger sprzątający nieaktualne rezerwacje z kolekcji Rooms
 W Atlasie stworzyliśmy trigger, który usuwa przeszłe bookingi z kolekcji Rooms, w celu optymalizacji bazy danych (tablice te urosłyby szybko do ogromnych rozmiarów).
