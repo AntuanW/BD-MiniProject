@@ -5,7 +5,7 @@ Grzegorz Piśkorski: piskorski@student.agh.edu.pl
 Antoni Wójcik: antoniwojcik@student.agh.edu.pl
 
 ## Temat projektu:
-Rezerwowanie noclegów w hotelach. Aplikacja będzie pozwalała na rezerwację pokojów w kilku wybranych hotelach.
+Rezerwowanie noclegów w hotelach. Aplikacja będzie pozwalała na rezerwację pokoi w kilku wybranych hotelach.
 
 ## Technologia:
 MongoDB, Python Flask, Jinja2
@@ -24,7 +24,6 @@ MongoDB, Python Flask, Jinja2
     - [Customers](#customers)
     - [Booking\_logs](#booking_logs)
   - [Metody i funkcje operujące na bazie danych](#metody-i-funkcje-operujące-na-bazie-danych)
-    - [Część z nich, nie jest wykorzystywana w aplikacji, ponieważ nie udało się zaimplementować, niektórych funkcjonalności, ale przydatne są przy zarządzaniu bazą danych](#część-z-nich-nie-jest-wykorzystywana-w-aplikacji-ponieważ-nie-udało-się-zaimplementować-niektórych-funkcjonalności-ale-przydatne-są-przy-zarządzaniu-bazą-danych)
     - [Metody i funkcje korzystające z więcej niż jednej kolekcji](#metody-i-funkcje-korzystające-z-więcej-niż-jednej-kolekcji)
   - [Opis kodu najważniejszych funkcjonalności projektu](#opis-kodu-najważniejszych-funkcjonalności-projektu)
     - [Rezerwacja pokoju, zmiana terminów już zarezerwowanego pokoju](#rezerwacja-pokoju-zmiana-terminów-już-zarezerwowanego-pokoju)
@@ -36,6 +35,8 @@ MongoDB, Python Flask, Jinja2
     - [Customers](#customers-1)
     - [Booking\_Logs](#booking_logs-1)
   - [Widoki](#widoki)
+    - [Autentykacja i autoryzacja użytkownika](#autentykacja-i-autoryzacja-użytkownika)
+    - [Generowanie widoków](#generowanie-widoków)
 
 
 ## Instrukcja uruchomienia aplikacji
@@ -52,7 +53,6 @@ MONGODB_PASSWORD = ...
 ```
 
 Następnie możemy uruchomić całą aplikację z poziomu pliku app.py.
-
 
 ## Główne funkcjonalności projektu
 - możliwość zarezerwowania noclegu w jednym z dostępnych hotelów w bazie danych (wyświetlenie dostępnych pokoi w danym okresie czasu)
@@ -117,34 +117,34 @@ Następnie możemy uruchomić całą aplikację z poziomu pliku app.py.
 ```
 
 ## Metody i funkcje operujące na bazie danych
-### Część z nich, nie jest wykorzystywana w aplikacji, ponieważ nie udało się zaimplementować, niektórych funkcjonalności, ale przydatne są przy zarządzaniu bazą danych
+Część z nich nie jest wykorzystywana w aplikacji, ponieważ nie udało się zaimplementować niektórych funkcjonalności, jednak przydatne są przy zarządzaniu bazą danych
 
 - Hotels
-  - get_all_hotels() - zwraca listę z danymi o hotelach
-  - get_all_cities() - zwraca listę miast, z których są hotele (przydatna w filtrach)
-  - add_hotel(name, street, city, zip_code, img) - dodaje hotel do bazy
-  - remove_hotel(hotel_id) - usuwa hotel z bazy wraz z jego pokojami (zał. nie ma żadnych rezerwacji na pokoje z danego hotelu)
+  - `get_all_hotels()` - zwraca listę z danymi o hotelach
+  - `get_all_cities()` - zwraca listę miast, z których są hotele (przydatna w filtrach)
+  - `add_hotel(name, street, city, zip_code, img)` - dodaje hotel do bazy
+  - `remove_hotel(hotel_id)` - usuwa hotel z bazy wraz z jego pokojami (zał. nie ma żadnych rezerwacji na pokoje z danego hotelu)
 - Rooms
-  - get_wrong_bookings(room_id, check_in, check_out, booking_id) - zwraca listę rezerwacji nachądzących na podany okres czasu
-  - get_occupied_rooms(check_in, check_out) - zwraca listę pokoi, które są zarezerwowane w podanym okresie czasu
-  - add_room(hotel_id, room_type, room_number, ppn, img, availability) - dodaje pokój od bazy
-  - remove_room(room_id) - usuwa pokój z bazy danych
-  - set_price_per_night(room_id, new_price) - zmienia cenę za noc danego pokoju
-  - set_availability(room_id, availability) - uaktualnia dostępność danego pokoju (chodzi o dostępność w razie np. remontu pokoju)
+  - `get_wrong_bookings(room_id, check_in, check_out, booking_id)` - zwraca listę rezerwacji nachądzących na podany okres czasu
+  - `get_occupied_rooms(check_in, check_out)` - zwraca listę pokoi, które są zarezerwowane w podanym okresie czasu
+  - `add_room(hotel_id, room_type, room_number, ppn, img, availability)` - dodaje pokój od bazy
+  - `remove_room(room_id)` - usuwa pokój z bazy danych
+  - `set_price_per_night(room_id, new_price)` - zmienia cenę za noc danego pokoju
+  - `set_availability(room_id, availability)` - uaktualnia dostępność danego pokoju (chodzi o dostępność w razie np. remontu pokoju)
 - Customers
-  - add_customer(name, surname, mail, passwd) - dodaje nowego użytkownika do bazy danych
-  - get_all_user_bookings(user_id) - zwraca listę wszystkich rezerwacji danego użytkownika
-  - get_user_email(email) - zwraca użytkownika o podanym emailu - przydatna w uwierzytelnianiu użytkownika
-  - remove_customer(customer_id) - usuwa użytkownika z bazdy danych
+  - `add_customer(name, surname, mail, passwd)` - dodaje nowego użytkownika do bazy danych
+  - `get_all_user_bookings(user_id)` - zwraca listę wszystkich rezerwacji danego użytkownika
+  - `get_user_email(email)` - zwraca użytkownika o podanym emailu - przydatna w uwierzytelnianiu użytkownika
+  - `remove_customer(customer_id)` - usuwa użytkownika z bazdy danych
 
 ### Metody i funkcje korzystające z więcej niż jednej kolekcji
-- can_be_booked(room_id, check_in, check_out, booking_id) - funkcja pomocnicza, korzystająca z get_wrong_bookings - sprawdza czy można zarezerwować podany pokój na konkretny termin
-- push_bookings(booking_id, customer_id, room_id, check_in, check_out) - funkcja pomocnicza - dodaje odpowiednie dane do odpowiedniego pokoju i użytkownika na temat rezerwacji
-- add_new_booking(customer_id, room_id, check_in, check_out) - dodanie nowej rezerwacji - dodawana jest w kolekcji Customers i Rooms (o ile to możliwe)
-- change_booking(customer_id, room_id, booking_id, check_in, check_out) - zmiana rezerwacji danego pokoju przez klienta, wprowadza zmiany w obu kolekcjach (o ile to możliwe)
-- filter_rooms(check_in, check_out, min_price, max_price, room_type, hotel_city) - zwraca listę pokoi, spełniających podane kryteria (np. cena min i max, liczba osób w pokoju, pokoje wolne w danym terminie itp.)
-- remove_booking(booking_id, customer_id, room_id) - usuwa danę rezerwację z obu kolekcji - Rooms i Customers
-- add_validators() - dodaje do bazy danych walidatory, których schemat pokazany jest poniżej
+- `can_be_booked(room_id, check_in, check_out, booking_id)` - funkcja pomocnicza, korzystająca z get_wrong_bookings - sprawdza czy można zarezerwować podany pokój na konkretny termin
+- `push_bookings(booking_id, customer_id, room_id, check_in, check_out)` - funkcja pomocnicza - dodaje odpowiednie dane do odpowiedniego pokoju i użytkownika na temat rezerwacji
+- `add_new_booking(customer_id, room_id, check_in, check_out)` - dodanie nowej rezerwacji - dodawana jest w kolekcji Customers i Rooms (o ile to możliwe)
+- `change_booking(customer_id, room_id, booking_id, check_in, check_out)` - zmiana rezerwacji danego pokoju przez klienta, wprowadza zmiany w obu kolekcjach (o ile to możliwe)
+- `filter_rooms(check_in, check_out, min_price, max_price, room_type, hotel_city)` - zwraca listę pokoi, spełniających podane kryteria (np. cena min i max, liczba osób w pokoju, pokoje wolne w danym terminie itp.)
+- `remove_booking(booking_id, customer_id, room_id)` - usuwa danę rezerwację z obu kolekcji - Rooms i Customers
+- `add_validators()` - dodaje do bazy danych walidatory, których schemat pokazany jest poniżej
 
 ## Opis kodu najważniejszych funkcjonalności projektu
 
@@ -181,7 +181,7 @@ def get_wrong_bookings(room_id: ObjectId, check_in: datetime, check_out: datetim
                 "bookings.booking_id": {'$nin': [ObjectId(booking_id)]}
             }
         })
-    query.append({  # Etap 4 - wyranie bookingów kolidujących z nasszym terminem
+    query.append({  # Etap 4 - wybranie bookingów kolidujących z naszym terminem
         '$match': {
             '$or': [
                 {
@@ -240,7 +240,7 @@ def get_wrong_bookings(room_id: ObjectId, check_in: datetime, check_out: datetim
     # funkcja zwraca listę kolidujących bookingów
     return list(mongo.rooms.aggregate(query))
 ```
-Aby sprawdzić, czy pokój może zostać zarezerwowany, używamy funkcji `can_be_booked()`. Nie jest ona skomplikowana, bazuje na poznanej wyżej funkcji `get_wrong_bookings()`, sprawdzając, czy jest ona pusta:<br>
+Aby sprawdzić, czy pokój może zostać zarezerwowany, używamy funkcji `can_be_booked()`. Nie jest ona skomplikowana, bazuje na poznanej wyżej funkcji `get_wrong_bookings()`, sprawdzając, czy zwracana lista jest pusta:<br>
 ```python
 def can_be_booked(room_id: ObjectId, check_in: datetime, check_out: datetime, booking_id: ObjectId = None):
     if check_in >= check_out:
@@ -252,9 +252,205 @@ def can_be_booked(room_id: ObjectId, check_in: datetime, check_out: datetime, bo
     return len(bookings) == 0
 ```
 Posiadając te funkcje, jesteśmy w stanie tworzyć bookingi oraz zmieniać ich daty jeżeli użytkowanik sobie tego zażyczy.<br>
+Aby dodać booking, korzystamy z funkcji `add_new_booking()`:
+```python
+def add_new_booking(customer_id: str, room_id: str, check_in: datetime, check_out: datetime):
+    # konwersja id klienta i pokoju na obiekt typu ObjectId
+    try:
+        customer_id = ObjectId(customer_id)
+        room_id = ObjectId(room_id)
+    except Exception as e:
+        print("[SERVER]", e)
+        return False
+    
+    # Następnie sprawdzamy, czy można stworzyć taki booking funkcją can_be_booked bez argumentu customer_id
+    if can_be_booked(room_id, check_in, check_out):
+        # Jeżeli tak, tworzymy nowe Id dla bookingu
+        booking_id = ObjectId()
+        # Następnie wypychamy je do bazy danych (funkcja opisana poniżej)
+        return push_bookings(booking_id, customer_id, room_id, check_in, check_out)
+    else:
+        print("[SERVER] Term is colliding.")
+        return False
+```
+Rezerwacja umieszczana jest w bazie przy pomocy funkcji `push_bookings`:
+```python
+def push_bookings(booking_id: ObjectId, customer_id: ObjectId, room_id: ObjectId, check_in: datetime,
+                  check_out: datetime):
+    # Utworzenie struktur słownikowych reprezentujących booking w kolekcji Rooms i Customers
+    booking_in_customers = {
+        "booking_id": booking_id,
+        "room_id": room_id,
+        "date_from": check_in,
+        "date_to": check_out
+    }
+    booking_in_rooms = {
+        "booking_id": booking_id,
+        "customer_id": customer_id,
+        "date_from": check_in,
+        "date_to": check_out
+    }
+    
+    # Dodanie rezerwacji do kolekcji Rooms, dokładniej do tablicy bookings dla danego pokoju
+    room_update = mongo.rooms.update_one({"_id": room_id}, {"$push": {"bookings": booking_in_rooms}})
+    if room_update.matched_count <= 0:
+        print("[SERVER] Failed to add booking to a room.")
+        return False
+    
+    # Dodanie rezerwacji do kolekcji Customer, dokładniej do tablicy bookings dla podanego klienta
+    customer_update = mongo.customers.update_one({"_id": customer_id},
+                                                 {"$push": {"bookings": booking_in_customers}})
+    if customer_update.matched_count <= 0:
+        print("[SERVER] Failed to add booking to a customer.")
+        return False
+    print("[SERVER] Successfully booked a room.")
+    return True
+```
+Użytkownik posiadający już booking ma możliwość zmiany jego daty. W naszej aplikacji odbywa się to w sposób następujący, przy pomocy funkcji
+`change_booking()`. W kodzie użyta jest znana już funkcja `can_be_booked()`, jednak tym razem posiada dodatkowy argument z id bookingu, aby nie brać go pod uwagę przy znajdowaniu kolizji
+(inaczej zawsze z nowym terminem kolidować będzie aktualny booking, którego daty chcemy zmienić):
+```python
+def change_booking(customer_id: str, room_id: str, booking_id: str, check_in: datetime, check_out: datetime):
+    try:
+        room_id = ObjectId(room_id)
+        booking_id = ObjectId(booking_id)
+        customer_id = ObjectId(customer_id)
+    except Exception as e:
+        print("[SERVER]", e)
+        return False
+    # Sprawdzanie, czy nowa data jest osiągalna pod względem dostępności pokoju
+    if can_be_booked(room_id, check_in, check_out, booking_id):
+
+        # update w kolekcji Customers
+        customer_update = mongo.customers.update_one(
+            {   # zastosujemy update dla wybranego klienta i konkretnego bookingu
+                "_id": ObjectId(customer_id),
+                "bookings.booking_id": booking_id
+            },
+            {   # zmiana dat
+                "$set": {
+                    "bookings.$.date_from": check_in,
+                    "bookings.$.date_to": check_out
+                }
+            }
+        )
+
+        if customer_update.matched_count <= 0:
+            print("[SERVER] Failed to add booking to a room.")
+            return False
+
+        # update w kolekcji Rooms
+        room_update = mongo.rooms.update_one(
+            {   # zastosujemy update dla wybranego pokoju i konkretnego bookingu
+                "_id": room_id,
+                "bookings.booking_id": booking_id
+            },
+            {   # zmiana dat
+                "$set": {
+                    "bookings.$.date_from": check_in,
+                    "bookings.$.date_to": check_out
+                }
+            }
+        )
+
+        if room_update.matched_count <= 0:
+            print("[SERVER] Failed to add booking to a room.")
+            return False
+        return True
+    else:
+        print("[SERVER] You cannot rebook this room.")
+        return False
+```
+
+Kolejną z najważniejszych funkcjonalności jest filtrowanie dostępnych pokoi. Aby zrozumieć kod, należy najpierw zapoznać się z funkcją `get_occupied_rooms()`.
+Korzysta ona ze znanej już nam funkcji `get_wrong_bookings()`, następnie zamienia listę kolidujących rezerwacji na listę id pokoi, których te rezerwacje dotyczą.
+```python
+def get_occupied_rooms(check_in: datetime, check_out: datetime):
+
+    booked_rooms = get_wrong_bookings(None, check_in, check_out, None)
+    res: set = set()
+    for i in booked_rooms:
+        res.add(i['_id'])
+    return list(res)
+```
+
+Filtrowanie realizujemy przy pomocy `filter_rooms()`. Idea jest następująca: funkcja posiada pipeline, który domyślnie wyświetli wszystkie pokoje w bazie danych.
+W miarę dodawania kolejnych filtrów, zmieniane są poszczególne etapy tego pipeline'a, aby na koniec wysłać go do bazy poleceniem aggregate:
+```python
+def filter_rooms(check_in: datetime = datetime(2400, 1, 1), check_out: datetime = datetime(2400, 1, 2), min_price: float = None, max_price: float = None,
+                 room_type: int = None, hotel_city: str = None):
+    # Ucięcie części godzinowej z daty
+    if check_in is None:
+        check_in_fixed = datetime.now().date()
+        check_in_fixed = datetime.combine(check_in_fixed, datetime.min.time())
+    else:
+        check_in_fixed = check_in
+    
+    # Następnie tworzymy czarną listę Id pokoi, na które na pewno nie może zostać złożona rezerwacja
+    black_list = get_occupied_rooms(check_in_fixed, check_out)
+    
+    # pipeline query:
+    query = [
+        {   # Etap 1 -> wybór pokoi dostępnych do wynajęcia, o cenie z odpowiedniego przedziału i odpowiednim typie pokoju
+            # ich Id nie może zawierać się na czarnej liście
+            '$match': {
+                'is_available': True,
+                '_id': {
+                    '$nin': black_list
+                },
+                'price_per_night': {
+                    '$gte': 0.0,
+                    '$lt': 100000000.0
+                },
+                'room_type': {'$exists': 1}
+            }
+        }, {    # Etap 2 -> Dołączenie dla wynikowych pokoi informacji o hotelu do którego należą
+            '$lookup': {
+                'from': 'Hotels',
+                'localField': 'hotel_id',
+                'foreignField': '_id',
+                'as': 'hotel_info'
+            }
+        }, {    # Etap 3 -> Rozpakowanie tych informacji, aby stały się obiektem
+            '$unwind': '$hotel_info'
+        }, {    # Wyświetlanie interesujących nas informacji
+            '$project': {
+                '_id': 0,
+                'room_id': '$_id',
+                'room_type': 1,
+                'price_per_night': 1,
+                'room_imgUrl': '$imgUrl',
+                'hotel_name': '$hotel_info.name',
+                'hotel_street': '$hotel_info.street',
+                'hotel_city': '$hotel_info.city'
+            }
+        }, {    # Wyświetlanie pokoi z konkretncyh miast
+            '$match': {
+                'hotel_city': {
+                    '$exists': 1
+                }
+            }
+        }
+    ]
+    # Modyfikacje zapytania, w zależności od użytych filtrów:
+    if min_price is not None:
+        # ustawienie minimalnej ceny z 0 na min_price
+        query[0]['$match']['price_per_night']['$gte'] = min_price
+    if max_price is not None:
+        # ustawienie maksymalnej ceny z inf. na max_price
+        query[0]['$match']['price_per_night']['$lt'] = max_price
+    if room_type is not None:
+        # ustawienie typu pokoju z {'$exists': 1} (warunek istnienia pola, wyświetli każdy dokument) na room_type
+        query[0]['$match']['room_type'] = room_type
+    if hotel_city is not None:
+        # ustawienie miasta z {'$exists': 1} (warunek istnienia pola, wyświetli każdy dokument) na hotel_city
+        query[4]['$match']['hotel_city'] = hotel_city
+
+    result = mongo.rooms.aggregate(query)
+    return list(result)
+```
 
 ### Filtrowanie listy dostepnych pokoi
-
 
 ## Trigger sprzątający nieaktualne rezerwacje z kolekcji Rooms
 W Atlasie stworzyliśmy trigger, który usuwa przeszłe bookingi z kolekcji Rooms, w celu optymalizacji bazy danych (tablice te urosłyby szybko do ogromnych rozmiarów).
@@ -480,11 +676,11 @@ exports = async function() {
 
 ### Autentykacja i autoryzacja użytkownika
 Do autoryzacji i autentykacji użytkownika korzystamy z modułu Flask_Login, który
-bardzo ułatwia sprawę, przy rzeczach typu: sprawdzanie jaki użytkownik jest zalogowant,
+bardzo ułatwia sprawę, przy rzeczach typu: sprawdzanie, który użytkownik jest zalogowany,
 szybki dostęp do jego danych itp. <br>
 
-Poniżej widzimy funkcję odpowiedzialną, za rejestrowanie nowego użytkownika.
-Po odebraniu requesta typu POST odczytywane są wszystkie dane przesłane w formularzu
+Poniżej widzimy funkcję odpowiedzialną za rejestrowanie nowego użytkownika.
+Po odebraniu requesta typu `POST` odczytywane są wszystkie dane przesłane w formularzu
 i wykonywana jest proste sprawdzanie danych.
 ```python
 @auth.route('/sign-up', methods=['GET', 'POST'])
@@ -529,7 +725,7 @@ Następnie mamy funkcję odpowiedzialną za logowanie się użytkownika.
 Podobnie jak w przypadku rejestracji, w przypadku requesta typu POST
 czytane są odpowiednie dane i dokonywane jest proste sprawdzenie, czy
 dany użytkownik jest już w naszej bazie danych i zalogowanie użytkownika
-z użyciem login_user().
+z użyciem `login_user()`.
 ```python
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
@@ -555,8 +751,8 @@ def login():
 <br>
 
 Ostatnią częścią związaną z tym punktem jest wylogowyanie użytkownika.
-Ponownie jak w poprzednich funkcja z wielką pomocą przychodzi nam flask_login -
-w tym przypadku funkcja logout_user().
+Ponownie jak w poprzednich funkcja z wielką pomocą przychodzi nam `flask_login` -
+w tym przypadku funkcja `logout_user()`.
 ```python
 @auth.route('/logout')
 @login_required
@@ -593,7 +789,7 @@ Fragment kodu umożliwiający nam łatwe wygenerowanie kart hoteli korzystające
 ```
 <br>
 
-**Generowanie listy pokojów** w momencie gdy użytkownik jest zalogowany -
+**Generowanie listy pokoi w momencie gdy użytkownik jest zalogowany** -
 w tym widoku poza listą pokojów, które można zarezerwować i formularzem rezerwacji
 mamy dostęp do filtrów - możemy filtrować po następujących kategoriach:
 - max/min price
@@ -601,9 +797,8 @@ mamy dostęp do filtrów - możemy filtrować po następujących kategoriach:
 - number of people in one room
 - city
 <br>
-<a/>
 
-W tym przypadku, musieliśmy rozróżnić dwa typy POST - jeden odpowiedzialny za filtry,
+W tym przypadku, musieliśmy rozróżnić dwa typy `POST` - jeden odpowiedzialny za filtry,
 a drugi za rezerwację pokoju. Rozróżniamy je na podstawie informacji przychodzących
 wraz z requestem.
 ```python
