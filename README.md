@@ -8,7 +8,7 @@ Antoni Wójcik: antoniwojcik@student.agh.edu.pl
 Rezerwowanie noclegów w hotelach. Aplikacja będzie pozwalała na rezerwację pokojów w kilku wybranych hotelach.
 
 ## Technologia:
-MongoDB, Python Flask
+MongoDB, Python Flask, Jinja2
 
 ## Spis treści dokumentacji
 
@@ -476,3 +476,356 @@ exports = async function() {
 - rooms_list - lista pokoi (wraz z filtrami), kiedy nie jesteśmy zalogowani
 - my_bookings - widok dla zalogowanego użytkownika - wyświetla wszystkie nasze (przyszłe i przeszłe) rezerwacje oraz daje możliwość modyfikacji rezerwacji
 - reserve_rooms - widok dla zalogowanego użytkownika - taki sam jak widok rooms_list, ale z opcją rezerwacji pokoju
+
+
+### Autentykacja i autoryzacja użytkownika
+Do autoryzacji i autentykacji użytkownika korzystamy z modułu Flask_Login, który
+bardzo ułatwia sprawę, przy rzeczach typu: sprawdzanie jaki użytkownik jest zalogowant,
+szybki dostęp do jego danych itp. <br>
+
+Poniżej widzimy funkcję odpowiedzialną, za rejestrowanie nowego użytkownika.
+Po odebraniu requesta typu POST odczytywane są wszystkie dane przesłane w formularzu
+i wykonywana jest proste sprawdzanie danych.
+```python
+@auth.route('/sign-up', methods=['GET', 'POST'])
+def sign_up():
+    if request.method == 'POST':
+        # Odczyt danych z formularza
+        name = request.form.get('firstName')
+        surname = request.form.get('surname')
+        email = request.form.get('email')
+        password1 = request.form.get('password1')
+        password2 = request.form.get('password2')
+        
+        # Sprawdzenie jakości danych i walidacja podanych haseł
+        email_pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+        result = re.match(email_pattern, email)
+        if not result:
+            flash('Wrong email format!', category='error')
+        elif len(name) == 0:
+            flash('You must enter your name!', category='error')
+        elif len(surname) == 0:
+            flash('You must enter your surname!', category='error')
+        elif len(password1) < 5:
+            flash('Your password is too short!', category='error')
+        elif password1 != password2:
+            flash('Passwords do not match!', category='error')
+        else:
+            # Dodanie użytkownika do bazy daych i zalogowanie go przy pomocy flask_login
+            if add_customer(name, surname, email, generate_password_hash(password1, method='sha256')):
+                flash('Account created successfully!', category='success')
+                user = get_user_email(email)
+                user = LoggedUser(str(user['_id']), name, surname, email, password1)
+                login_user(user, remember=True)
+                return redirect(url_for('views.home'))
+            else:
+                flash('Creating account failed, this email is already taken!', category='error')
+
+    return render_template("signup.html", user=current_user)
+```
+<br>
+
+Następnie mamy funkcję odpowiedzialną za logowanie się użytkownika.
+Podobnie jak w przypadku rejestracji, w przypadku requesta typu POST
+czytane są odpowiednie dane i dokonywane jest proste sprawdzenie, czy
+dany użytkownik jest już w naszej bazie danych i zalogowanie użytkownika
+z użyciem login_user().
+```python
+@auth.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        # Odczyt danych z przesłanego formularza
+        email = request.form.get('email')
+        password = request.form.get('password')
+        
+        # Sprawdzenie, czy taki użytkownik istnieje w naszej bazie danych i sprawdzenie czy hasło się zgadza
+        user = get_user_email(email)
+        if user is None:
+            flash('There is no user with this email address.', category='error')
+        elif check_password_hash(user['password'], password):
+            user = LoggedUser(str(user['_id']), user['name'], user['surname'], user['email'], user['password'], user['bookings'])
+            # Zalogowanie użytkownika przy pomocy flask_login
+            login_user(user, remember=True)
+            flash("Logged in!", category='success')
+            return redirect(url_for('views.home'))
+        else:
+            flash('Incorrect password.', category='error')
+    return render_template("login.html", user=current_user)
+```
+<br>
+
+Ostatnią częścią związaną z tym punktem jest wylogowyanie użytkownika.
+Ponownie jak w poprzednich funkcja z wielką pomocą przychodzi nam flask_login -
+w tym przypadku funkcja logout_user().
+```python
+@auth.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('auth.login'))
+```
+
+### Generowanie widoków
+**Generowanie strony startowej** - na stronie startowej naszej aplikacji widnieje lista
+hoteli, z którymi "współpracujemy", a także oczywiście odpowiedni navbar i footer.
+<br>
+Funkcja generująca stronę:
+```python
+@views.route('/')
+def home():
+    hotels = get_all_hotels()
+    return render_template("start_page.html", user=current_user, hotels=hotels)
+```
+Fragment kodu umożliwiający nam łatwe wygenerowanie kart hoteli korzystającego z Jinja2:
+```html
+<h1>We work with following hotels:</h1>
+<div class="hotels-wrapper" id="hotels">
+    <-- Fragment Jinji2 -->
+    {% for hotel in hotels %}
+    <div class="hotel-card">
+        <img src={{ hotel['imgUrl'] }}>
+        <h3 class="hotel-name">Name: {{ hotel['name'] }}</h3>
+        <h3>Street: {{ hotel['street'] }}</h3>
+        <h3>City: {{ hotel['city'] }}</h3>
+    </div>
+    {% endfor %}
+</div>
+```
+<br>
+
+**Generowanie listy pokojów** w momencie gdy użytkownik jest zalogowany -
+w tym widoku poza listą pokojów, które można zarezerwować i formularzem rezerwacji
+mamy dostęp do filtrów - możemy filtrować po następujących kategoriach:
+- max/min price
+- checkin/checkout date
+- number of people in one room
+- city
+<br>
+<a/>
+
+W tym przypadku, musieliśmy rozróżnić dwa typy POST - jeden odpowiedzialny za filtry,
+a drugi za rezerwację pokoju. Rozróżniamy je na podstawie informacji przychodzących
+wraz z requestem.
+```python
+@views.route('/reserve_rooms', methods=['GET', 'POST'])
+@login_required
+def reserve_list():
+    cities = get_all_cities()
+    rooms = filter_rooms()
+    if request.method == 'POST' and request.form.get('checkin') is not None:
+        date_format = "%Y-%m-%d"
+        check_in = request.form.get('checkin')
+        check_in = datetime.strptime(check_in, date_format)
+
+        check_out = request.form.get('checkout')
+        check_out = datetime.strptime(check_out, date_format)
+
+        curr_date = datetime.now().date()
+        curr_date = datetime.combine(curr_date, datetime.min.time())
+        if check_in < curr_date:
+            flash('Check in date must be greater than or equals current date.', category='error')
+        elif check_out < check_in:
+            flash('Check in date must be less or equal than check out date.', category='error')
+        else:
+            room_id = request.form.get('room_id')
+            customer_id = request.form.get('customer_id')
+
+            if add_new_booking(customer_id, room_id, check_in, check_out):
+                flash('Room booked successfully!', category='success')
+            else:
+                flash('Room is already booked in this period of time.', category='error')
+    elif request.method == 'POST':
+        # Odczytanie danych z formularza dotyczącego filtrów
+        min_price = request.form.get('min_price')
+        max_price = request.form.get('max_price')
+        check_in = request.form.get('checkin-filter')
+        check_out = request.form.get('checkout-filter')
+        people = request.form.get('people')
+        city = request.form.get('city')
+
+        # Obsługa danych - zamiana na odpowiedni typ danych
+        date_format = "%Y-%m-%d"
+        check_in = datetime.strptime(check_in, date_format) if check_in != '' else None
+        check_out = datetime.strptime(check_out, date_format) if check_out != '' else None
+        min_price = float(min_price) if min_price != '' else None
+        max_price = float(max_price) if max_price != '' else None
+        people = int(people) if people != '' else None
+
+        if city == 'select':
+            city = None
+
+        curr_date = datetime.now().date()
+        curr_date = datetime.combine(curr_date, datetime.min.time())
+        
+        # Proste sprawdzanie "jakości" dat
+        if (check_in is not None and check_out is not None) and check_out < check_in:
+            flash('Check in date must be less or equal than check out date.', category='error')
+        elif check_in is not None and check_in < curr_date:
+            flash('Check in date must be greater or equal to current date.', category='error')
+        else:
+            # Wywołanie funkcji filtrującej pokoje
+            rooms = filter_rooms(check_in, check_out, min_price, max_price, people, city)
+
+    return render_template("reserve_rooms.html", user=current_user, rooms=rooms, cities=cities)
+```
+<br>
+Tak jak w poprzednim przypadku Jinja2 bardzo ułatwia nam generowanie listy przefiltorwanych pokoi:
+
+```html
+<div class="rooms-wrapper">
+    {% for room in rooms %}
+    <div class="room-card">
+        <img src={{ room['room_imgUrl'] }}>
+        <h3>Hotel: {{ room['hotel_name'] }}</h3>
+        <h3>City: {{ room['hotel_city'] }}</h3>
+        <h3>Street: {{ room['hotel_street'] }}</h3>
+        <h3>People in room: {{ room['room_type'] }}</h3>
+        <h3>Price per night: {{ room['price_per_night'] }} zł</h3>
+        <form method="POST" class="date-form">
+            <div class="form-group">
+                <label for="checkin">Check in date:</label>
+                <input type="date" id="checkin" name="checkin" required>
+            </div>
+            <div class="form-group">
+                <label for="checkout">Check out date:</label>
+                <input type="date" id="checkout" name="checkout" required>
+            </div>
+            <input type="hidden" name="room_id" value={{ room['room_id'] }}>
+            <input type="hidden" name="customer_id" value={{ current_user._id }}>
+            <div class="btn-wrap">
+                <button type="submit" class="reserve-btn">Book</button>
+            </div>
+        </form>
+    </div>
+    {% endfor %}
+</div>
+```
+<br>
+
+**Generowanie rezerwacji użtykownika** - umożliwia on zarządzanie naszymi rezerwacjami - rezygnację
+lub zmianę daty danej rezerwacji.
+```python
+@views.route('/bookings', methods=['GET', 'POST'])
+@login_required
+def my_bookings():
+    # Kod obsługujący zmianę daty rezerwacji
+    if request.method == 'POST' and request.form.get('new_checkin') is not None:
+        booking_id = request.form.get('booking_id')
+        customer_id = current_user._id
+        room_id = request.form.get('room_id')
+
+        date_format = "%Y-%m-%d"
+        new_checkin = request.form.get('new_checkin')
+        new_checkin = datetime.strptime(new_checkin, date_format)
+
+        new_checkout = request.form.get('new_checkout')
+        new_checkout = datetime.strptime(new_checkout, date_format)
+
+        curr_date = datetime.now().date()
+        curr_date = datetime.combine(curr_date, datetime.min.time())
+        if new_checkin < curr_date:
+            flash('Check in date must be greater than or equals current date.', category='error')
+        elif new_checkout < new_checkin:
+            flash('Check in date must be less or equal than check out date.', category='error')
+        else:
+            if change_booking(customer_id, room_id, booking_id, new_checkin, new_checkout):
+                flash('Room booked successfully!', category='success')
+            else:
+                flash('Room is already booked in this period of time.', category='error')
+
+    user_bookings = get_all_user_bookings(current_user._id)   # str
+    return render_template("my_bookings.html", user=current_user, bookings=user_bookings)
+```
+Z rezygnacją z rezerwacji przychodzi nam z pomocą JavaScript:
+```js
+function removeBooking(booking_id, room_id) {
+    fetch('/remove-booking', {
+        method: 'POST',
+        body: JSON.stringify({booking_id: booking_id, room_id: room_id})
+    }).then((_res) => {
+        window.location.href = '/bookings'
+    });
+}
+```
+A z generowaniem listy ponownie pomagam nam Jinja2:
+```html
+{% for booking in bookings %}
+<div class="room-card">
+    <img src={{ booking['room_imgUrl'] }}>
+    <h3>Hotel: {{ booking['hotel_name'] }}</h3>
+    <h3>Address: {{ booking['hotel_city'] }}, {{ booking['hotel_address'] }} </h3>
+    <h3>Room type: {{ booking['room_type'] }} people</h3>
+    <h3>Price per night: {{ booking['price_per_night'] }}zł</h3>
+    <h3>Check in date: {{ booking['date_from'] }}</h3>
+    <h3>Check out date: {{ booking['date_to'] }}</h3>
+
+    {% if booking['can_be_edited'] %}
+        <div class="btn-wrap">
+            <button class="reserve-btn" onClick="fillAndShowTheForm('{{ booking['hotel_name'] }}', '{{ booking['date_from'] }}', '{{ booking['date_to'] }}', '{{ booking['booking_id'] }}', '{{ current_user._id }}', '{{ booking['room_id'] }}')">
+                Change booking
+            </button>
+            <form method="POST">
+                <button type="submit" class="remove-booking" onClick="removeBooking('{{ booking['booking_id'] }}', '{{ booking['room_id'] }}')">Resign</button>
+            </form>
+        </div>
+    {% endif %}
+</div>
+{% endfor %}
+```
+
+<br>
+Z zachowaniem spójności we wszystkich widokach pomaga nam system dziedziczenia w Jinja2 -
+każdy widok dziedziczy po widoku bazowym w ten sam sposób:
+
+```html
+{% extends "start_base.html" %}
+{% block content %}
+    ...
+{% endblock %}
+```
+
+A sam widok bazowy wygląda w następujący sposób:
+
+```html
+<nav class="navbar">
+<!-- Generowanie zawartości menu na podstawie tego czy użytkownik jest zalogowany -->
+    {% if user.is_authenticated %}
+    <div class="nav-elem"><a id="home" href="/">Home</a></div>
+    <div class="nav-elem"><a id="rooms" href="/reserve_rooms">Rooms selection</a></div>
+    <div class="nav-elem"><a id="bookings" href="/bookings">My bookings</a></div>
+    <div class="nav-elem"><a id="logout" href="/logout">Logout</a></div>
+    {% else %}
+    <div class="nav-elem"><a id="home" href="/">Home</a></div>
+    <div class="nav-elem"><a id="rooms" href="/rooms">Rooms selection</a></div>
+    <div class="nav-elem"><a id="login" href="/login">Login</a></div>
+    <div class="nav-elem"><a id="signUp" href="/sign-up">Sign-Up</a></div>
+    {% endif %}
+</nav>
+
+<!-- Wypisywanie ewentualnych błądów lub różnych informacji po wykonaniu jakiejś akcji na stronie np. zalogowaniu się -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            {% if category == 'error' %}
+                <div class="alert error" role="alert">
+                    {{ message }}
+                </div>
+            {% else %}
+                <div class="alert success" role="alert">
+                    {{ message }}
+                </div>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<!-- Miejsce, w którym generować się będzie nasze potomne widoki -->
+{% block content %} {% endblock %}
+<footer>
+    <ul class="footer-items">
+        <li class="footer-item title">OurName</li>
+        <li class="footer-item"><a href="mailto:email@gmail.com"><i class="fa-solid fa-envelope"></i>email@gmail.com</a></li>
+        <li class="footer-item"><a href="tel:555-0179"><i class="fa-solid fa-mobile-button"></i>Phone-Number: 123-456-789</a></li>
+    </ul>
+</footer>
+```
